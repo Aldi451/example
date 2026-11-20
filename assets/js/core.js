@@ -2,8 +2,8 @@
    core.js — utilitas bersama + lapisan data (DB)
    --------------------------------------------------------------------------
    Mode diatur di assets/js/env.js:
-     "local"    -> config.json + localStorage   (demo, tanpa server)
-     "supabase" -> Supabase Postgres + Auth + RLS (produksi, lihat supabase/schema.sql)
+     "local"   -> config.json + localStorage     (demo statis / GitHub Pages)
+     "hosting" -> PHP + MySQL di InfinityFree    (produksi, folder api/)
 
    Semua halaman HANYA memanggil DB.* sehingga pindah backend tidak perlu
    mengubah app.js / admin.js.
@@ -16,7 +16,6 @@ const APP = {
   LS_CART: 'restaurantCart',
   LS_ORDERS: 'restaurantOrders',
   SS_ADMIN: 'restaurantAdminAuth',
-  SB_TOKEN: 'sbAccessToken',
   MAX_ORDER_ITEMS: 40
 };
 
@@ -118,7 +117,7 @@ function normalizeConfig(raw, base = FALLBACK_CONFIG) {
   const menu = Array.isArray(src.menu) ? src.menu : base.menu;
 
   return {
-    version: 3,
+    version: 4,
     businessName: String(src.businessName || base.businessName).slice(0, 60),
     tagline: String(src.tagline ?? base.tagline ?? '').slice(0, 60),
     phoneNo: normalizePhone(src.phoneNo ?? base.phoneNo),
@@ -167,25 +166,39 @@ function publicConfig(config) {
 
 const DB = (() => {
   const env = window.APP_ENV || { backend: 'local' };
+  const apiBase = String(env.apiBase || 'api').replace(/\/$/, '');
+  const isHosting = () => env.backend === 'hosting';
+  let csrf = null;
 
-  const isSupabase = () => env.backend === 'supabase' && env.supabaseUrl && env.supabaseAnonKey;
-  const rest = (path) => `${env.supabaseUrl}/rest/v1/${path}`;
+  /** Fetch ke API PHP dengan cookie sesi + token CSRF. */
+  async function api(path, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+    const headers = { Accept: 'application/json', ...(options.headers || {}) };
+    let body = options.body;
 
-  function headers(extra = {}) {
-    const token = sessionStorage.getItem(APP.SB_TOKEN);
-    return {
-      apikey: env.supabaseAnonKey,
-      Authorization: `Bearer ${token || env.supabaseAnonKey}`,
-      'Content-Type': 'application/json',
-      ...extra
-    };
-  }
+    if (body !== undefined && !(body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(body);
+    }
+    if (method !== 'GET' && csrf) headers['X-CSRF-Token'] = csrf;
 
-  async function sbFetch(path, options = {}) {
-    const res = await fetch(rest(path), { ...options, headers: headers(options.headers) });
-    if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
-    const text = await res.text();
-    return text ? JSON.parse(text) : null;
+    const res = await fetch(`${apiBase}/${path}`, {
+      method,
+      headers,
+      body,
+      credentials: 'same-origin'
+    });
+
+    let payload = null;
+    try { payload = await res.json(); } catch { payload = null; }
+
+    if (!res.ok || !payload || payload.ok === false) {
+      const message = payload?.error || `Permintaan gagal (${res.status})`;
+      const err = new Error(message);
+      err.status = res.status;
+      throw err;
+    }
+    return payload;
   }
 
   /* ------------------------------ config -------------------------------- */
@@ -199,153 +212,169 @@ const DB = (() => {
     }
   }
 
-  /**
-   * Config untuk halaman publik.
-   * local    : config.json
-   * supabase : tabel store_live (yang sudah di-publish admin)
-   */
+  /** Config untuk halaman pelanggan. */
   async function getPublicConfig() {
     const staticCfg = normalizeConfig(await readStaticConfig());
-    // Mode demo: config.json + hasil "publish" di localStorage (per-browser)
-    if (!isSupabase()) return normalizeConfig(readJson(APP.LS_CONFIG, {}), staticCfg);
-    try {
-      const rows = await sbFetch('store_live?id=eq.1&select=data');
-      return normalizeConfig(rows?.[0]?.data || staticCfg, staticCfg);
-    } catch (err) {
-      console.warn('Supabase gagal, fallback ke config.json:', err.message);
-      return staticCfg;
+
+    if (isHosting()) {
+      try {
+        const { data } = await api('settings.php?which=live');
+        const hasData = data && Array.isArray(data.menu) && data.menu.length > 0;
+        return normalizeConfig(hasData ? data : staticCfg, staticCfg);
+      } catch (err) {
+        console.warn('API tidak tersedia, pakai config.json:', err.message);
+        return staticCfg;
+      }
     }
+
+    // Mode demo: config.json + "publish" lokal
+    return normalizeConfig(readJson(APP.LS_CONFIG, {}), staticCfg);
   }
 
-  /**
-   * Config untuk panel admin (termasuk draft yang belum di-publish).
-   * local    : config.json + override localStorage
-   * supabase : tabel store_draft (butuh login)
-   */
+  /** Config untuk dashboard admin (draft). */
   async function getDraftConfig() {
     const staticCfg = normalizeConfig(await readStaticConfig());
-    if (!isSupabase()) {
-      return normalizeConfig(readJson(APP.LS_CONFIG, {}) , staticCfg);
+
+    if (isHosting()) {
+      const { data } = await api('settings.php?which=draft');
+      const hasData = data && Array.isArray(data.menu) && data.menu.length > 0;
+      return normalizeConfig(hasData ? data : staticCfg, staticCfg);
     }
-    const rows = await sbFetch('store_draft?id=eq.1&select=data');
-    return normalizeConfig(rows?.[0]?.data || staticCfg, staticCfg);
+    return normalizeConfig(readJson(APP.LS_CONFIG, {}), staticCfg);
   }
 
-  /** Simpan draft (belum tampil ke pengunjung pada mode supabase). */
   async function saveDraft(config) {
     const payload = publicConfig(config);
-    if (!isSupabase()) {
+    if (!isHosting()) {
       store(APP.LS_CONFIG, payload);
       return { mode: 'local' };
     }
-    await sbFetch('store_draft?on_conflict=id', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify([{ id: 1, data: payload, updated_at: new Date().toISOString() }])
-    });
-    return { mode: 'supabase' };
+    await api('settings.php?which=draft', { method: 'POST', body: { data: payload } });
+    return { mode: 'hosting' };
   }
 
-  /** Publish: draft menjadi data yang dilihat semua pengunjung. */
   async function publish(config) {
     const payload = publicConfig(config);
-    if (!isSupabase()) {
+    if (!isHosting()) {
       store(APP.LS_CONFIG, payload);
       return { mode: 'local' };
     }
-    await sbFetch('store_live?on_conflict=id', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify([{ id: 1, data: payload, updated_at: new Date().toISOString() }])
-    });
-    return { mode: 'supabase' };
+    await api('settings.php?which=publish', { method: 'POST', body: { data: payload } });
+    return { mode: 'hosting' };
   }
 
   /* ------------------------------- auth --------------------------------- */
 
-  async function signIn({ pin, email, password }) {
-    if (!isSupabase()) {
+  async function signIn({ username, password }) {
+    if (!isHosting()) {
       const cfg = await getDraftConfig();
-      if (String(pin) === String(cfg.adminPin || '1234')) {
+      if (String(username) === 'admin' && String(password) === String(cfg.adminPin || '1234')) {
         sessionStorage.setItem(APP.SS_ADMIN, '1');
         return { ok: true, mode: 'local' };
       }
       return { ok: false, error: 'PIN salah.' };
     }
 
-    const res = await fetch(`${env.supabaseUrl}/auth/v1/token?grant_type=password`, {
-      method: 'POST',
-      headers: { apikey: env.supabaseAnonKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    if (!res.ok) return { ok: false, error: 'Email atau password salah.' };
-    const data = await res.json();
-    sessionStorage.setItem(APP.SB_TOKEN, data.access_token);
-    sessionStorage.setItem(APP.SS_ADMIN, '1');
-    return { ok: true, mode: 'supabase' };
+    try {
+      const res = await api('auth.php?action=login', {
+        method: 'POST',
+        body: { username, password }
+      });
+      csrf = res.csrf || null;
+      sessionStorage.setItem(APP.SS_ADMIN, '1');
+      return { ok: true, mode: 'hosting', username: res.username };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
   }
 
-  function signOut() {
-    sessionStorage.removeItem(APP.SB_TOKEN);
+  async function signOut() {
+    if (isHosting()) {
+      try { await api('auth.php?action=logout', { method: 'POST' }); } catch { /* abaikan */ }
+    }
+    csrf = null;
     sessionStorage.removeItem(APP.SS_ADMIN);
   }
 
   const isAuthed = () => sessionStorage.getItem(APP.SS_ADMIN) === '1';
 
+  /** Cek sesi PHP yang masih hidup, sekaligus ambil token CSRF. */
+  async function refreshSession() {
+    if (!isHosting()) return isAuthed();
+    try {
+      const res = await api('auth.php?action=me');
+      csrf = res.csrf || null;
+      if (res.loggedIn) {
+        sessionStorage.setItem(APP.SS_ADMIN, '1');
+        return true;
+      }
+      sessionStorage.removeItem(APP.SS_ADMIN);
+      return false;
+    } catch {
+      return isAuthed();
+    }
+  }
+
   /* ------------------------------ pesanan ------------------------------- */
 
-  /**
-   * Simpan pesanan. Pada mode supabase ini satu-satunya jalan agar pemilik
-   * punya riwayat pesanan (WA tetap dikirim sebagai notifikasi).
-   */
   async function createOrder(order) {
     const payload = {
-      created_at: new Date().toISOString(),
-      customer_name: order.customerInfo.slice(0, 120),
-      service_type: order.serviceType.slice(0, 60),
-      note: (order.note || '').slice(0, 200),
+      customerInfo: order.customerInfo,
+      serviceType: order.serviceType,
+      note: order.note || '',
       items: order.items.slice(0, APP.MAX_ORDER_ITEMS),
-      total: order.total,
-      status: 'baru',
-      source: isSupabase() ? 'supabase' : 'local'
+      total: order.total
     };
 
-    if (!isSupabase()) {
+    if (!isHosting()) {
       const list = readJson(APP.LS_ORDERS, []);
-      list.unshift({ ...payload, id: 'ord-' + Date.now().toString(36) });
+      list.unshift({
+        id: 'ord-' + Date.now().toString(36),
+        created_at: new Date().toISOString(),
+        customer_name: payload.customerInfo,
+        service_type: payload.serviceType,
+        note: payload.note,
+        items: payload.items,
+        total: payload.total,
+        status: 'baru'
+      });
       store(APP.LS_ORDERS, list.slice(0, 100));
       return payload;
     }
-
-    const rows = await sbFetch('orders', {
-      method: 'POST',
-      headers: { Prefer: 'return=representation' },
-      body: JSON.stringify(payload)
-    });
-    return rows?.[0] || payload;
+    return api('orders.php', { method: 'POST', body: payload });
   }
 
   async function listOrders() {
-    if (!isSupabase()) return readJson(APP.LS_ORDERS, []);
-    return (await sbFetch('orders?select=*&order=created_at.desc&limit=100')) || [];
+    if (!isHosting()) return readJson(APP.LS_ORDERS, []);
+    const { data } = await api('orders.php?limit=100');
+    return data || [];
   }
 
   async function updateOrderStatus(id, status) {
-    if (!isSupabase()) {
+    if (!isHosting()) {
       const list = readJson(APP.LS_ORDERS, [])
-        .map((o) => (o.id === id ? { ...o, status } : o));
+        .map((o) => (String(o.id) === String(id) ? { ...o, status } : o));
       store(APP.LS_ORDERS, list);
       return;
     }
-    await sbFetch(`orders?id=eq.${encodeURIComponent(id)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ status })
-    });
+    await api('orders.php?action=status', { method: 'POST', body: { id, status } });
+  }
+
+  /* ------------------------------- upload -------------------------------- */
+
+  async function uploadImage(file) {
+    if (!isHosting()) {
+      throw new Error('Upload gambar hanya tersedia pada mode hosting (PHP).');
+    }
+    const form = new FormData();
+    form.append('file', file);
+    const res = await api('upload.php', { method: 'POST', body: form });
+    return res.path;
   }
 
   return {
-    isSupabase,
+    isHosting,
+    api,
     getPublicConfig,
     getDraftConfig,
     saveDraft,
@@ -353,9 +382,11 @@ const DB = (() => {
     signIn,
     signOut,
     isAuthed,
+    refreshSession,
     createOrder,
     listOrders,
-    updateOrderStatus
+    updateOrderStatus,
+    uploadImage
   };
 })();
 

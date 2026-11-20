@@ -90,7 +90,10 @@ if (!cfg.socmed?.instagram && !cfg.socmed?.facebook) {
   warnings.push('sosmed kosong — ikon sosmed disembunyikan (ok untuk demo)');
 }
 if (String(cfg.adminPin) === '1234') {
-  warnings.push('adminPin masih default 1234 — ganti sebelum mode produksi');
+  warnings.push('adminPin masih default 1234 — pada mode hosting PIN tidak dipakai (login pakai tabel admins)');
+}
+if (cfg.version !== undefined && cfg.version < 4) {
+  warnings.push('config.json versi lama — jalankan dashboard lalu Publish untuk migrasi ke v4');
 }
 
 warnings.forEach((w) => console.warn('⚠️  ' + w));

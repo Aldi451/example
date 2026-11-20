@@ -41,41 +41,52 @@
   /* -------------------------------- auth --------------------------------- */
 
   function backendLabel() {
-    const supabase = DB.isSupabase();
-    const label = supabase ? 'Supabase (produksi)' : 'Mode demo (localStorage)';
+    const hosting = DB.isHosting();
+    const label = hosting ? 'Hosting PHP + MySQL' : 'Mode demo (localStorage)';
     ['backend-label', 'backend-label-2'].forEach((id) => {
       const el = $(id);
       if (!el) return;
       el.textContent = label;
-      el.className = 'badge ' + (supabase ? 'badge--ok' : 'badge--warn');
+      el.className = 'badge ' + (hosting ? 'badge--ok' : 'badge--warn');
     });
-    $('lock-pin-field').hidden = supabase;
-    $('lock-sb-fields').hidden = !supabase;
+    $('lock-pin-field').hidden = hosting;
+    $('lock-sb-fields').hidden = !hosting;
+    const upload = $('menu-upload-row');
+    if (upload) upload.hidden = !hosting;
   }
 
-  function unlock() {
+  async function unlock() {
     $('lock-screen').hidden = true;
     $('admin-content').hidden = false;
+
+    // Mode hosting: draft baru boleh diambil setelah sesi login valid.
+    if (!config) {
+      try {
+        config = await DB.getDraftConfig();
+      } catch (err) {
+        toast('Gagal memuat data toko: ' + err.message, 'error', 5000);
+        return;
+      }
+    }
     loadFormData();
   }
 
-  function initAuth() {
+  async function initAuth() {
     backendLabel();
-    if (DB.isAuthed()) { unlock(); return; }
+    if (await DB.refreshSession()) { await unlock(); return; }
 
     $('lock-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const result = await DB.signIn({
-        pin: $('pin-input').value.trim(),
-        email: $('sb-email').value.trim(),
-        password: $('sb-password').value
+        username: DB.isHosting() ? $('sb-email').value.trim() : 'admin',
+        password: DB.isHosting() ? $('sb-password').value : $('pin-input').value.trim()
       });
       if (!result.ok) {
         $('pin-error').textContent = result.error || 'Gagal masuk.';
         return;
       }
       $('pin-error').textContent = '';
-      unlock();
+      await unlock();
       toast('Selamat datang, admin', 'success');
     });
   }
@@ -343,7 +354,7 @@
     const wrap = $('orders-list');
     if (!orders.length) {
       wrap.innerHTML = `<p class="cart-empty">Belum ada pesanan tercatat.${
-        DB.isSupabase() ? '' : ' (Mode demo: pesanan disimpan di browser ini saja.)'}</p>`;
+        DB.isHosting() ? '' : ' (Mode demo: pesanan disimpan di browser ini saja.)'}</p>`;
       return;
     }
     wrap.innerHTML = orders.map((o) => `
@@ -405,7 +416,7 @@
       await DB.publish(config);
       isDirty = false;
       $('dirty-badge').hidden = true;
-      toast(DB.isSupabase()
+      toast(DB.isHosting()
         ? 'Live! Semua pengunjung sudah melihat perubahan.'
         : 'Tersimpan lokal. Unduh config.json untuk membuat permanen.', 'success', 5000);
     } catch (err) {
@@ -495,14 +506,35 @@
     $('btn-reset-menu').addEventListener('click', resetMenuForm);
     $('menu-image').addEventListener('input', updateImagePreview);
 
+    const uploadInput = $('menu-upload');
+    if (uploadInput) {
+      uploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const status = $('upload-status');
+        status.textContent = 'Mengunggah…';
+        try {
+          const path = await DB.uploadImage(file);
+          $('menu-image').value = path;
+          updateImagePreview();
+          status.textContent = 'Terunggah: ' + path;
+          markDirty();
+        } catch (err) {
+          status.textContent = 'Gagal: ' + err.message;
+        } finally {
+          e.target.value = '';
+        }
+      });
+    }
+
     $('btn-publish').addEventListener('click', doPublish);
     $('btn-download').addEventListener('click', downloadConfig);
     $('btn-backup').addEventListener('click', exportBackup);
     $('btn-reset').addEventListener('click', resetAll);
     $('btn-refresh-orders').addEventListener('click', loadOrders);
 
-    $('btn-logout').addEventListener('click', () => {
-      DB.signOut();
+    $('btn-logout').addEventListener('click', async () => {
+      await DB.signOut();
       location.reload();
     });
 
@@ -517,11 +549,18 @@
     });
   }
 
-  async function init() {
-    config = await DB.getDraftConfig();
+  function applyPublishHint() {
+    const hint = $('publish-hint');
+    if (!hint) return;
+    hint.innerHTML = DB.isHosting()
+      ? '<strong>Mode produksi:</strong> klik <em>Publish</em> untuk langsung mengubah data yang dilihat semua pengunjung. Data tetap aman walau browser ditutup.'
+      : '<strong>Mode demo:</strong> perubahan hanya tersimpan di browser ini. Klik <em>Unduh config.json</em>, lalu upload ke repo (menimpa <code>config.json</code>) dan commit.';
+  }
 
-    // Mode demo: PIN dibaca dari config.json (file publik) sebagai pembanding
-    if (!DB.isSupabase()) {
+  async function init() {
+    // Mode demo: butuh config untuk membandingkan PIN
+    if (!DB.isHosting()) {
+      config = await DB.getDraftConfig();
       try {
         const res = await fetch(APP.CONFIG_URL, { cache: 'no-cache' });
         if (res.ok) {
@@ -530,8 +569,10 @@
         }
       } catch { /* offline: pakai default */ }
     }
+    // Mode hosting: config diambil setelah login (lihat unlock())
 
-    initAuth();
+    applyPublishHint();
+    await initAuth();
     bindEvents();
   }
 

@@ -455,3 +455,8 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .admin-menu-card.is-out img { filter: grayscale(1); opacity: .7; }
 .admin-menu-card__actions { flex-wrap: wrap; }
 .admin-menu-card__actions .btn { padding: 6px 4px; }
+
+/* upload row (admin) */
+.upload-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.upload-row label.btn { cursor: pointer; }
+.upload-status { font-size: .74rem; color: var(--ink-muted); font-weight: 600; }

@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "businessName": "Mie Ayam Wonogiri Mas Jon",
   "tagline": "Rasa Otentik Khas Wonogiri",
   "phoneNo": "6281386067672",
@@ -9,9 +9,21 @@
   "welcomeDescription": "Kami menyajikan Mie Ayam berkualitas tinggi dengan resep tradisional Wonogiri yang sudah teruji cita rasanya. Setiap porsi dibuat fresh dengan bahan-bahan pilihan terbaik.",
   "adminPin": "1234",
   "services": [
-    { "id": "dine-in", "label": "Makan di Tempat", "enabled": true },
-    { "id": "takeaway", "label": "Bawa Pulang (Takeaway)", "enabled": true },
-    { "id": "delivery", "label": "Delivery / Kirim ke Alamat", "enabled": true }
+    {
+      "id": "dine-in",
+      "label": "Makan di Tempat",
+      "enabled": true
+    },
+    {
+      "id": "takeaway",
+      "label": "Bawa Pulang (Takeaway)",
+      "enabled": true
+    },
+    {
+      "id": "delivery",
+      "label": "Delivery / Kirim ke Alamat",
+      "enabled": true
+    }
   ],
   "menu": [
     {

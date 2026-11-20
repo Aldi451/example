@@ -1,13 +1,15 @@
 /* ==========================================================================
    env.js — konfigurasi backend
    --------------------------------------------------------------------------
-   "local"    : demo, data dari config.json + localStorage (tanpa server)
-   "supabase" : produksi, data dari Supabase (lihat supabase/README.md)
+   "local"   : demo statis — config.json + localStorage (bisa jalan di GitHub Pages)
+   "hosting" : PHP + MySQL di InfinityFree (produksi) — lihat folder api/ dan
+               api-docs/INSTALL.md
 
-   anon key AMAN dipublikasikan. JANGAN pernah menaruh service_role key di sini.
+   Pada mode "hosting", situs HARUS dibuka dari server InfinityFree,
+   bukan dari GitHub Pages (GitHub Pages tidak menjalankan PHP).
    ========================================================================== */
 window.APP_ENV = {
   backend: 'local',
-  supabaseUrl: '',
-  supabaseAnonKey: ''
+  // Path folder API, relatif terhadap index.html. Jangan diubah kecuali dipindah.
+  apiBase: 'api'
 };

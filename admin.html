@@ -26,8 +26,8 @@
 
       <div id="lock-sb-fields" hidden>
         <div class="field">
-          <label for="sb-email">Email admin</label>
-          <input type="text" id="sb-email" autocomplete="username" placeholder="admin@contoh.com">
+          <label for="sb-email">Username admin</label>
+          <input type="text" id="sb-email" autocomplete="username" placeholder="masjon">
         </div>
         <div class="field">
           <label for="sb-password">Password</label>
@@ -39,8 +39,9 @@
       <button type="submit" class="btn btn--red btn--block">Masuk</button>
     </form>
     <p class="field__hint" style="margin-top:16px">
-      Mode demo PIN: <code>1234</code>. Untuk produksi, aktifkan Supabase
-      (<code>assets/js/env.js</code>) agar login memakai email + password sungguhan.
+      Mode demo PIN: <code>1234</code>. Untuk produksi, set
+      <code>assets/js/env.js</code> → <code>backend: 'hosting'</code> agar login memakai
+      username + password dari database MySQL.
     </p>
   </div>
 
@@ -154,8 +155,13 @@
             <div class="field">
               <label for="menu-image">Gambar</label>
               <input type="text" id="menu-image" placeholder="assets/menu/mie-ayam-biasa.webp">
-              <p class="field__hint">Path lokal atau URL https. Kosongkan untuk pakai logo.</p>
+              <p class="field__hint">Path lokal, URL https, atau hasil upload.</p>
               <p class="error-text" role="alert"></p>
+              <div class="upload-row" id="menu-upload-row" hidden>
+                <label class="btn btn--outline btn--sm" for="menu-upload">Upload dari perangkat</label>
+                <input type="file" id="menu-upload" accept="image/jpeg,image/png,image/webp" class="sr-only">
+                <span class="upload-status" id="upload-status"></span>
+              </div>
             </div>
           </div>
 
