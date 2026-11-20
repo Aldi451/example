@@ -1,0 +1,8 @@
+# kredensial & data lokal — jangan pernah di-commit
+api/config.php
+api/.setup-lock
+api/data/
+uploads/
+*.log
+.DS_Store
+node_modules/

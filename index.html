@@ -1,340 +1,157 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mie Ayam Wonogiri Mas Jon</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .menu-card-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 12px 12px 0 0;
-        }
-        .hero-section {
-            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
-        }
-        .menu-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .menu-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        .badge-special {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mie Ayam Wonogiri Mas Jon — mie ayam otentik khas Wonogiri. Pesan via WhatsApp: makan di tempat, takeaway, atau delivery.">
+  <meta name="theme-color" content="#b91c1c">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; frame-src https://maps.google.com https://www.google.com; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Mie Ayam Wonogiri Mas Jon</title>
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
+  <link rel="preload" href="assets/menu/mie-ayam-spesial.webp" as="image" fetchpriority="high">
+  <link rel="preload" href="assets/img/logo.webp" as="image">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mie Ayam Wonogiri Mas Jon">
+  <meta property="og:description" content="Rasa otentik khas Wonogiri. Pesan langsung via WhatsApp.">
+  <meta property="og:image" content="assets/menu/mie-ayam-spesial.webp">
 </head>
-<body class="bg-gradient-to-b from-amber-50 to-red-50 text-gray-800 font-sans pb-24">
+<body>
 
-    <!-- Header & Hero -->
-    <header class="hero-section text-white shadow-xl sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <img src="logo.jpeg" alt="Logo Mie Ayam" class="w-14 h-14 rounded-full border-4 border-amber-300 object-cover shadow-lg">
-                <div>
-                    <h1 class="text-2xl font-black leading-tight">Mie Ayam Wonogiri</h1>
-                    <p class="text-sm text-amber-200">🍜 Rasa Otentik - Mas Jon</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="admin.html" class="bg-amber-500 hover:bg-amber-600 text-red-900 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg transition">
-                    <i class="fas fa-cog"></i> Admin
-                </a>
-                <a href="#keranjang" class="bg-amber-400 hover:bg-amber-500 text-red-900 px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg transition">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="cart-count">0</span>
-                </a>
-            </div>
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <div class="wrap site-header__inner">
+      <div class="brand">
+        <img src="assets/img/logo.webp" alt="Logo Mie Ayam Wonogiri Mas Jon"
+             class="brand__logo" width="48" height="48" fetchpriority="high">
+        <div>
+          <h1 class="brand__name" id="brand-name">Mie Ayam Wonogiri</h1>
+          <p class="brand__tag" id="brand-tag">Rasa Otentik</p>
         </div>
-    </header>
+      </div>
+      <div class="header-actions">
+        <a href="#keranjang" class="btn btn--amber" aria-label="Lihat keranjang">
+          <span id="cart-icon" aria-hidden="true"></span>
+          <span class="cart-badge" id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
 
-    <!-- Banner Info -->
-    <section class="bg-gradient-to-r from-amber-100 to-orange-100 border-b-4 border-red-600 py-4 text-center text-sm font-bold text-amber-900 shadow">
-        🍜 Nikmati Mie Ayam Khas Wonogiri dengan Bumbu Manis Gurih yang Meresap! 🔥
+  <div class="info-bar" id="info-bar" role="status"></div>
+
+  <main class="wrap">
+
+    <!-- ============ WELCOME ============ -->
+    <section class="card card--welcome">
+      <h2 class="section-title">Selamat Datang!</h2>
+      <p class="welcome-lead" id="welcome-desc"></p>
+      <div class="meta-row" id="meta-row"></div>
     </section>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 space-y-10">
-        
-        <!-- Selamat Datang -->
-        <section class="bg-white rounded-2xl shadow-lg p-8 border-l-4 border-red-600">
-            <h2 class="text-3xl font-black text-red-800 mb-3">Selamat Datang!</h2>
-            <p class="text-gray-700 leading-relaxed" id="welcome-desc">
-                Kami menyajikan Mie Ayam berkualitas tinggi dengan resep tradisional Wonogiri yang sudah teruji cita rasanya. Setiap porsi dibuat fresh dengan bahan-bahan pilihan terbaik.
-            </p>
-        </section>
+    <!-- ============ MENU ============ -->
+    <section aria-labelledby="menu-title">
+      <div class="section-title" id="menu-title">
+        <span id="menu-icon" aria-hidden="true"></span> Daftar Menu Spesial
+      </div>
+      <p class="section-sub">Pilih menu favorit Anda, lalu kirim pesanan lewat WhatsApp.</p>
 
-        <!-- Section Menu -->
-        <section>
-            <h2 class="text-3xl font-black text-red-800 mb-2 flex items-center gap-2">
-                <i class="fas fa-utensils text-amber-600"></i> Daftar Menu Spesial
-            </h2>
-            <p class="text-gray-600 mb-6">Pilih menu favorit Anda dan pesan sekarang!</p>
-            
-            <div id="menu-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Menu items akan dimuat dari config.json -->
-            </div>
-        </section>
+      <div class="search-box">
+        <span class="search-box__icon" id="search-icon" aria-hidden="true"></span>
+        <label for="menu-search" class="sr-only">Cari menu</label>
+        <input type="text" id="menu-search" placeholder="Cari menu… (contoh: bakso)"
+               autocomplete="off" maxlength="40">
+      </div>
 
-        <!-- Section Rekap Pesanan & Form -->
-        <section id="keranjang" class="bg-white p-8 rounded-2xl shadow-xl border-t-4 border-red-600">
-            <h2 class="text-2xl font-black text-red-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-receipt"></i> Rekap Pesanan Anda
-            </h2>
-            
-            <!-- List Items -->
-            <div id="cart-items" class="space-y-3 mb-6 text-sm">
-                <p class="text-gray-400 italic text-center py-6">Belum ada menu yang dipilih.</p>
-            </div>
+      <div class="filters" id="filters" role="group" aria-label="Filter kategori menu"></div>
 
-            <!-- Total Harga -->
-            <div class="flex justify-between items-center font-black text-lg border-t-2 border-b-2 border-red-600 py-4 mb-6 bg-red-50 px-4 rounded">
-                <span>Total Bayar:</span>
-                <span id="cart-total" class="text-red-700 text-2xl">Rp 0</span>
-            </div>
+      <div class="menu-grid" id="menu-container">
+        <noscript>
+          <p class="cart-empty">Aktifkan JavaScript untuk melihat daftar menu.</p>
+        </noscript>
+      </div>
+    </section>
 
-            <!-- Opsi Layanan & Form -->
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-gray-700">Tipe Pelayanan:</label>
-                    <select id="service-type" class="w-full border-2 border-red-300 rounded-lg p-3 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-red-600 font-semibold">
-                        <option value="Makan di Tempat">🍽️ Makan di Tempat</option>
-                        <option value="Bawa Pulang (Takeaway)">🛍️ Bawa Pulang (Takeaway)</option>
-                        <option value="Delivery / Kirim ke Alamat">🛵 Delivery / Pengiriman</option>
-                    </select>
-                </div>
+    <!-- ============ LOKASI ============ -->
+    <section id="lokasi" class="card" aria-labelledby="map-title" hidden>
+      <h2 class="section-title" id="map-title">
+        <span aria-hidden="true">📍</span> Lokasi Kami
+      </h2>
+      <p class="section-sub" id="map-address"></p>
+      <div class="map-wrap">
+        <iframe id="map-frame" title="Peta lokasi Mie Ayam Wonogiri Mas Jon"
+                loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen></iframe>
+      </div>
+      <a class="btn btn--red btn--block" id="map-link" target="_blank"
+         rel="noopener noreferrer">Buka di Google Maps</a>
+    </section>
 
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-gray-700">Nama Pemesan / No. Meja / Alamat:</label>
-                    <input type="text" id="customer-info" placeholder="Contoh: Budi (Meja No 4) / Alamat Kirim" class="w-full border-2 border-red-300 rounded-lg p-3 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-red-600">
-                </div>
+    <!-- ============ KERANJANG ============ -->
+    <section id="keranjang" class="card card--cart" aria-labelledby="cart-title">
+      <h2 class="section-title" id="cart-title">
+        <span id="cart-title-icon" aria-hidden="true"></span> Rekap Pesanan Anda
+      </h2>
 
-                <button onclick="sendWhatsApp()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-3 shadow-xl transition transform hover:scale-105">
-                    <i class="fab fa-whatsapp text-2xl"></i> Kirim Pesanan via WhatsApp
-                </button>
-            </div>
-        </section>
+      <div id="cart-items"></div>
 
-    </main>
+      <div class="total-row">
+        <span>Total Bayar</span>
+        <span class="total-row__amount" id="cart-total">Rp 0</span>
+      </div>
 
-    <!-- Footer: Sosmed & Alamat Toko -->
-    <footer class="bg-gradient-to-r from-red-900 to-red-800 text-amber-100 py-10 border-t-4 border-amber-400 mt-12">
-        <div class="max-w-6xl mx-auto px-4 space-y-6">
-            <div class="text-center space-y-3">
-                <h3 class="font-black text-2xl text-white">Mie Ayam Wonogiri Mas Jon</h3>
-                <p class="text-sm text-amber-200 flex flex-col gap-1" id="footer-address">
-                    📍 Jl. Raya Wonogiri No. 45, Kecamatan Wonogiri, Jawa Tengah<br>
-                    (Samping Bank BCA / Depan Alun-Alun)
-                </p>
-            </div>
-
-            <div id="footer-socmed" class="flex justify-center space-x-8 text-2xl">
-                <a href="#" class="hover:text-amber-400 hover:scale-125 transition transform"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="hover:text-amber-400 hover:scale-125 transition transform"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="hover:text-amber-400 hover:scale-125 transition transform"><i class="fab fa-whatsapp"></i></a>
-            </div>
-
-            <p class="text-xs text-amber-300/70 text-center">© 2026 Mie Ayam Wonogiri. Powered by Vibe Coding.</p>
+      <form id="order-form" novalidate>
+        <div class="field" id="field-service">
+          <label for="service-type">Tipe Pelayanan</label>
+          <select id="service-type" name="service"></select>
+          <p class="error-text" role="alert"></p>
         </div>
-    </footer>
 
-    <!-- Script Logic -->
-    <script>
-        let cart = [];
-        let config = {
-            businessName: "Mie Ayam Wonogiri Mas Jon",
-            phoneNo: "6281386067672",
-            address: "Jl. Raya Wonogiri No. 45, Kecamatan Wonogiri, Jawa Tengah (Samping Bank BCA / Depan Alun-Alun)",
-            welcomeDescription: "Kami menyajikan Mie Ayam berkualitas tinggi dengan resep tradisional Wonogiri yang sudah teruji cita rasanya. Setiap porsi dibuat fresh dengan bahan-bahan pilihan terbaik.",
-            menu: [
-                {
-                    id: 1,
-                    name: "Mie Ayam Biasa",
-                    description: "Mie + Potongan Ayam Semur + Sawis",
-                    price: 12000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Biasa"
-                },
-                {
-                    id: 2,
-                    name: "Mie Ayam Bakso",
-                    description: "Mie + Ayam Semur + 2 Bakso Sapi",
-                    price: 16000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Bakso"
-                },
-                {
-                    id: 3,
-                    name: "Mie Ayam Ceker",
-                    description: "Mie + Ayam Semur + 2 Ceker Empuk",
-                    price: 15000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Ceker"
-                },
-                {
-                    id: 4,
-                    name: "Mie Ayam Spesial",
-                    description: "Mie + Ayam + Bakso + Ceker Lengkap",
-                    price: 20000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Spesial"
-                },
-                {
-                    id: 5,
-                    name: "Es Teh Manis",
-                    description: "Es Teh Sedap Segar",
-                    price: 4000,
-                    image: "https://via.placeholder.com/300x200?text=Es+Teh+Manis"
-                },
-                {
-                    id: 6,
-                    name: "Es Jeruk Peras",
-                    description: "Jeruk Peras Segar & Dingin",
-                    price: 5000,
-                    image: "https://via.placeholder.com/300x200?text=Es+Jeruk+Peras"
-                }
-            ],
-            socmed: {
-                instagram: "https://instagram.com",
-                facebook: "https://facebook.com",
-                whatsapp: "https://wa.me/6281386067672"
-            }
-        };
+        <div class="field" id="field-customer">
+          <label for="customer-info">Nama Pemesan / No. Meja / Alamat</label>
+          <input type="text" id="customer-info" name="customer"
+                 placeholder="Contoh: Budi — Meja 4" autocomplete="name" maxlength="120">
+          <p class="error-text" role="alert"></p>
+        </div>
 
-        // Load config from localStorage or use default
-        function loadConfig() {
-            const saved = localStorage.getItem('restaurantConfig');
-            if (saved) {
-                config = JSON.parse(saved);
-            }
-            renderMenu();
-            updateFooter();
-        }
+        <div class="field">
+          <label for="order-note">Catatan (opsional)</label>
+          <input type="text" id="order-note" name="note"
+                 placeholder="Contoh: tanpa sawi, pedas, mie sedikit" maxlength="160">
+        </div>
 
-        function renderMenu() {
-            const container = document.getElementById('menu-container');
-            container.innerHTML = '';
-            
-            config.menu.forEach(item => {
-                const menuCard = document.createElement('div');
-                menuCard.className = 'menu-card bg-white rounded-xl shadow-lg border-2 border-amber-200 overflow-hidden flex flex-col';
-                menuCard.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}" class="menu-card-image">
-                    <div class="p-4 flex-1 flex flex-col">
-                        <h3 class="font-black text-lg text-gray-800 mb-1">${item.name}</h3>
-                        <p class="text-xs text-gray-500 mb-3 flex-1">${item.description}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-red-700 font-black text-lg">Rp ${item.price.toLocaleString('id-ID')}</span>
-                            <button onclick="addToCart('${item.name}', ${item.price})" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-105">
-                                + Tambah
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(menuCard);
-            });
-        }
+        <button type="submit" class="btn btn--green" id="submit-order">
+          <span id="submit-icon" aria-hidden="true"></span> Kirim Pesanan via WhatsApp
+        </button>
+        <p class="field__hint">
+          Pesanan dibuka di WhatsApp. Jangan tutup halaman sebelum pesan terkirim.
+        </p>
+      </form>
+    </section>
 
-        function updateFooter() {
-            document.getElementById('footer-address').innerHTML = `📍 ${config.address}`;
-            document.getElementById('welcome-desc').innerText = config.welcomeDescription;
-            
-            const socmedLinks = document.getElementById('footer-socmed');
-            socmedLinks.innerHTML = `
-                <a href="${config.socmed.instagram}" target="_blank" class="hover:text-amber-400 hover:scale-125 transition transform"><i class="fab fa-instagram"></i></a>
-                <a href="${config.socmed.facebook}" target="_blank" class="hover:text-amber-400 hover:scale-125 transition transform"><i class="fab fa-facebook"></i></a>
-                <a href="${config.socmed.whatsapp}" target="_blank" class="hover:text-amber-400 hover:scale-125 transition transform"><i class="fab fa-whatsapp"></i></a>
-            `;
-        }
+  </main>
 
-        function addToCart(name, price) {
-            const existing = cart.find(item => item.name === name);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ name, price, qty: 1 });
-            }
-            updateCart();
-        }
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <h3 class="site-footer__name" id="footer-name"></h3>
+      <p class="site-footer__addr" id="footer-addr"></p>
+      <div class="social" id="footer-social"></div>
+      <p class="copyright">
+        &copy; <span id="year">2026</span> Mie Ayam Wonogiri Mas Jon. Semua hak dilindungi.
+        <br><a href="admin.html" class="footer-admin">Panel Admin</a>
+      </p>
+    </div>
+  </footer>
 
-        function updateCart() {
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartTotal = document.getElementById('cart-total');
-            const cartCount = document.getElementById('cart-count');
+  <button type="button" class="fab" id="fab" hidden>
+    <span>Lihat Pesanan</span>
+    <span class="fab__total" id="fab-total"></span>
+  </button>
 
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="text-gray-400 italic text-center py-6">Belum ada menu yang dipilih.</p>';
-                cartTotal.innerText = 'Rp 0';
-                cartCount.innerText = '0';
-                return;
-            }
-
-            let html = '';
-            let total = 0;
-            let totalItems = 0;
-
-            cart.forEach((item, index) => {
-                const subtotal = item.price * item.qty;
-                total += subtotal;
-                totalItems += item.qty;
-                html += `
-                    <div class="flex justify-between items-center bg-gradient-to-r from-amber-50 to-orange-50 p-3 rounded-lg border-l-4 border-red-600">
-                        <div>
-                            <span class="font-bold text-gray-800">${item.name}</span>
-                            <div class="text-xs text-gray-500">Rp ${item.price.toLocaleString('id-ID')} x ${item.qty}</div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="font-black text-red-700">Rp ${subtotal.toLocaleString('id-ID')}</span>
-                            <button onclick="removeItem(${index})" class="text-gray-400 hover:text-red-600 hover:scale-125 text-lg transition transform">✕</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            cartItemsContainer.innerHTML = html;
-            cartTotal.innerText = `Rp ${total.toLocaleString('id-ID')}`;
-            cartCount.innerText = totalItems;
-        }
-
-        function removeItem(index) {
-            cart.splice(index, 1);
-            updateCart();
-        }
-
-        function sendWhatsApp() {
-            if (cart.length === 0) {
-                alert("Silakan pilih menu terlebih dahulu!");
-                return;
-            }
-
-            const serviceType = document.getElementById('service-type').value;
-            const customerInfo = document.getElementById('customer-info').value.trim();
-
-            if (!customerInfo) {
-                alert("Mohon isi Nama Pemesan / No. Meja / Alamat!");
-                return;
-            }
-
-            let text = `*Halo ${config.businessName}!*%0A`;
-            text += `Saya ingin memesan:*%0A%0A`;
-            text += `📌 *Tipe Pelayanan:* ${serviceType}%0A`;
-            text += `👤 *Detail Pemesan:* ${customerInfo}%0A%0A`;
-            text += `*Detail Pesanan:*%0A`;
-
-            let total = 0;
-            cart.forEach(item => {
-                const subtotal = item.price * item.qty;
-                total += subtotal;
-                text += `- ${item.name} (${item.qty}x) : Rp ${subtotal.toLocaleString('id-ID')}%0A`;
-            });
-
-            text += `%0A*Total Bayar:* Rp ${total.toLocaleString('id-ID')}%0A%0A`;
-            text += `Mohon segera diproses ya, terima kasih!`;
-
-            window.open(`https://wa.me/${config.phoneNo}?text=${text}`, '_blank');
-        }
-
-        // Load config on page load
-        loadConfig();
-    </script>
+  <script src="assets/js/env.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,40 @@
+# ============================================================================
+# Proteksi folder api — InfinityFree memakai Apache, file ini otomatis dibaca.
+# ============================================================================
+
+# Jangan tampilkan daftar file
+Options -Indexes
+
+# Blok akses langsung ke file internal
+<FilesMatch "^(config\.php|\.setup-lock|schema\.sql)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Hanya endpoint publik yang boleh diakses tanpa sesi
+<FilesMatch "^(auth|settings|orders|upload|setup|index)\.php$">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+</FilesMatch>
+
+# Matikan directory listing & signature
+ServerSignature Off
+
+# Jangan sajikan file contoh/skema lewat web
+<Files "config.example.php">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</Files>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
