@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Admin Panel — Mie Ayam Wonogiri Mas Jon</title>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Dashboard Admin — Mie Ayam Wonogiri Mas Jon</title>
   <link rel="icon" href="assets/img/favicon.png" type="image/png">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -12,62 +13,80 @@
 
   <!-- ============ LOCK SCREEN ============ -->
   <div class="lock-screen" id="lock-screen">
-    <h1>Admin Panel</h1>
-    <p>Masukkan PIN untuk mengelola menu & profil toko.</p>
+    <h1>Dashboard Admin</h1>
+    <p>Masuk untuk mengelola menu, harga, alamat, dan pesanan.</p>
+    <p><span class="badge" id="backend-label">mode demo</span></p>
+
     <form id="lock-form">
-      <div class="field">
+      <div class="field" id="lock-pin-field">
         <label for="pin-input" class="sr-only">PIN</label>
         <input type="password" id="pin-input" inputmode="numeric" autocomplete="current-password"
-               placeholder="PIN admin" required>
-        <p class="error-text" id="pin-error" role="alert"></p>
+               placeholder="PIN admin">
       </div>
+
+      <div id="lock-sb-fields" hidden>
+        <div class="field">
+          <label for="sb-email">Email admin</label>
+          <input type="text" id="sb-email" autocomplete="username" placeholder="admin@contoh.com">
+        </div>
+        <div class="field">
+          <label for="sb-password">Password</label>
+          <input type="password" id="sb-password" autocomplete="current-password" placeholder="••••••••">
+        </div>
+      </div>
+
+      <p class="error-text" id="pin-error" role="alert"></p>
       <button type="submit" class="btn btn--red btn--block">Masuk</button>
     </form>
     <p class="field__hint" style="margin-top:16px">
-      PIN default: <code>1234</code> — ganti di <code>config.json</code> (<code>adminPin</code>).
+      Mode demo PIN: <code>1234</code>. Untuk produksi, aktifkan Supabase
+      (<code>assets/js/env.js</code>) agar login memakai email + password sungguhan.
     </p>
   </div>
 
-  <!-- ============ ADMIN CONTENT ============ -->
+  <!-- ============ ADMIN ============ -->
   <div id="admin-content" hidden>
 
     <header class="admin-header">
       <div class="wrap admin-header__inner">
         <div>
-          <h1>Admin Panel</h1>
-          <p>Kelola bisnis Anda</p>
+          <h1>Dashboard Admin</h1>
+          <p><span class="badge" id="backend-label-2">mode demo</span></p>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a href="index.html" class="btn btn--amber btn--sm">Lihat Website</a>
+        <div class="header-actions">
+          <a href="index.html" class="btn btn--amber btn--sm" target="_blank" rel="noopener">Lihat Website</a>
           <button type="button" class="btn btn--ghost btn--sm" id="btn-logout">Keluar</button>
         </div>
       </div>
     </header>
 
-    <main class="wrap" style="padding-block:24px 60px">
+    <main class="wrap" style="padding-block:20px 70px">
 
       <div class="notice notice--warn">
-        <strong>Penting:</strong> perubahan di halaman ini tersimpan di browser Anda
-        (localStorage) sebagai <em>preview</em>. Supaya semua pengunjung melihat perubahan,
-        klik <strong>Unduh config.json</strong> lalu upload file itu ke repo (folder utama,
-        menimpa <code>config.json</code>). Tersimpan <span id="dirty-badge" hidden>— ada perubahan belum diekspor.</span>
+        <strong>Alur kerja:</strong> edit apa pun → <em>Simpan</em> (masuk draft) →
+        klik <strong>Publish</strong> saat sudah yakin.
+        <span id="dirty-badge" class="badge badge--warn" hidden>Draft belum dipublish</span>
       </div>
 
       <div class="tabs" role="tablist">
-        <button class="tab" data-tab="general" role="tab" aria-selected="true">Pengaturan Umum</button>
-        <button class="tab" data-tab="menu" role="tab" aria-selected="false">Menu</button>
+        <button class="tab" data-tab="profile" role="tab" aria-selected="true">Profil &amp; Alamat</button>
+        <button class="tab" data-tab="menu" role="tab" aria-selected="false">Menu &amp; Harga</button>
+        <button class="tab" data-tab="services" role="tab" aria-selected="false">Layanan</button>
         <button class="tab" data-tab="socmed" role="tab" aria-selected="false">Social Media</button>
+        <button class="tab" data-tab="orders" role="tab" aria-selected="false">Pesanan</button>
         <button class="tab" data-tab="publish" role="tab" aria-selected="false">Publish / Backup</button>
       </div>
 
-      <!-- ============ TAB: UMUM ============ -->
-      <section class="panel" id="general">
-        <form id="general-form" class="card">
-          <h2 class="section-title">Pengaturan Umum</h2>
+      <!-- ============ PROFIL ============ -->
+      <section class="panel" id="profile">
+        <form id="profile-form" class="card">
+          <h2 class="section-title">Profil &amp; Alamat</h2>
+
           <div class="grid-2">
             <div class="field">
               <label for="business-name">Nama Bisnis</label>
-              <input type="text" id="business-name" maxlength="60" required>
+              <input type="text" id="business-name" maxlength="60">
+              <p class="error-text" role="alert"></p>
             </div>
             <div class="field">
               <label for="tagline">Tagline</label>
@@ -77,6 +96,7 @@
               <label for="phone-no">Nomor WhatsApp</label>
               <input type="tel" id="phone-no" inputmode="numeric" placeholder="6281386067672">
               <p class="field__hint">Boleh diawali 0 — otomatis diubah ke format 62.</p>
+              <p class="error-text" role="alert"></p>
             </div>
             <div class="field">
               <label for="opening-hours">Jam Buka</label>
@@ -90,8 +110,12 @@
           </div>
 
           <div class="field">
-            <label for="maps-url">Link Google Maps (opsional)</label>
-            <input type="url" id="maps-url" placeholder="https://maps.app.goo.gl/...">
+            <label for="maps-url">Link Google Maps</label>
+            <input type="url" id="maps-url" placeholder="https://maps.google.com/?q=...">
+            <p class="field__hint">
+              Kosongkan untuk menyembunyikan peta. Isi dengan link Maps asli saat toko siap online.
+            </p>
+            <p class="error-text" role="alert"></p>
           </div>
 
           <div class="field">
@@ -99,11 +123,11 @@
             <textarea id="welcome-desc" rows="3" maxlength="400"></textarea>
           </div>
 
-          <button type="submit" class="btn btn--red btn--block">Simpan Pengaturan</button>
+          <button type="submit" class="btn btn--red btn--block">Simpan Profil</button>
         </form>
       </section>
 
-      <!-- ============ TAB: MENU ============ -->
+      <!-- ============ MENU ============ -->
       <section class="panel" id="menu" hidden>
         <form id="menu-form" class="card" style="margin-bottom:18px">
           <h2 class="section-title" id="menu-form-title">Tambah Menu Baru</h2>
@@ -119,9 +143,6 @@
               <input type="number" id="menu-price" min="0" step="500" placeholder="12000">
               <p class="error-text" role="alert"></p>
             </div>
-          </div>
-
-          <div class="grid-2">
             <div class="field">
               <label for="menu-category">Kategori</label>
               <select id="menu-category">
@@ -134,12 +155,18 @@
               <label for="menu-image">Gambar</label>
               <input type="text" id="menu-image" placeholder="assets/menu/mie-ayam-biasa.webp">
               <p class="field__hint">Path lokal atau URL https. Kosongkan untuk pakai logo.</p>
+              <p class="error-text" role="alert"></p>
             </div>
           </div>
 
           <div class="field">
             <label for="menu-desc">Deskripsi</label>
             <input type="text" id="menu-desc" maxlength="120" placeholder="Mie + ayam semur + sawi segar">
+          </div>
+
+          <div class="check-row">
+            <label class="check"><input type="checkbox" id="menu-soldout"> Tandai habis</label>
+            <label class="check"><input type="checkbox" id="menu-special"> Tandai favorit</label>
           </div>
 
           <img id="image-preview" alt="Pratinjau gambar menu" hidden
@@ -152,22 +179,36 @@
         </form>
 
         <div class="card">
-          <h2 class="section-title">Daftar Menu Saat Ini</h2>
+          <h2 class="section-title">Daftar Menu</h2>
           <div class="admin-menu-grid" id="menu-list"></div>
         </div>
       </section>
 
-      <!-- ============ TAB: SOCMED ============ -->
+      <!-- ============ LAYANAN ============ -->
+      <section class="panel" id="services" hidden>
+        <form id="services-form" class="card">
+          <h2 class="section-title">Tipe Pelayanan</h2>
+          <p class="section-sub">Hanya layanan aktif yang muncul di halaman pemesanan.</p>
+          <div id="service-list" class="repeat-list"></div>
+          <div class="toolbar">
+            <button type="button" class="btn btn--outline" id="btn-add-service">+ Tambah Layanan</button>
+            <button type="submit" class="btn btn--red">Simpan Layanan</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ============ SOCMED ============ -->
       <section class="panel" id="socmed" hidden>
         <form id="socmed-form" class="card">
-          <h2 class="section-title">Kelola Social Media</h2>
+          <h2 class="section-title">Social Media</h2>
+          <p class="section-sub">Kosongkan kolom yang belum punya akun — ikonnya otomatis disembunyikan.</p>
           <div class="field">
             <label for="instagram-url">URL Instagram</label>
-            <input type="url" id="instagram-url" placeholder="https://instagram.com/mieayamwonogiri">
+            <input type="url" id="instagram-url" placeholder="https://instagram.com/akun">
           </div>
           <div class="field">
             <label for="facebook-url">URL Facebook</label>
-            <input type="url" id="facebook-url" placeholder="https://facebook.com/mieayamwonogiri">
+            <input type="url" id="facebook-url" placeholder="https://facebook.com/akun">
           </div>
           <div class="field">
             <label for="whatsapp-url">URL WhatsApp</label>
@@ -177,26 +218,38 @@
         </form>
       </section>
 
-      <!-- ============ TAB: PUBLISH ============ -->
+      <!-- ============ PESANAN ============ -->
+      <section class="panel" id="orders" hidden>
+        <div class="card">
+          <div class="section-head">
+            <h2 class="section-title">Pesanan Terbaru</h2>
+            <button type="button" class="btn btn--outline btn--sm" id="btn-refresh-orders">Muat ulang</button>
+          </div>
+          <div id="orders-list" class="orders-list"></div>
+        </div>
+      </section>
+
+      <!-- ============ PUBLISH ============ -->
       <section class="panel" id="publish" hidden>
         <div class="card">
-          <h2 class="section-title">Publish &amp; Backup</h2>
-          <div class="notice notice--info">
-            <strong>Alur publish:</strong><br>
-            1. Klik <em>Unduh config.json</em>.<br>
-            2. Buka repo GitHub → <code>config.json</code> → <em>Edit</em> / upload file baru.<br>
-            3. Commit. GitHub Pages otomatis build (±1 menit), perubahan live untuk semua orang.
+          <h2 class="section-title">Publish</h2>
+          <div class="notice notice--info" id="publish-hint">
+            <strong>Mode demo:</strong> perubahan hanya tersimpan di browser ini.
+            Klik <em>Unduh config.json</em>, lalu upload ke repo (menimpa <code>config.json</code>) dan commit.
+            Setelah Supabase aktif, cukup klik <strong>Publish</strong>.
           </div>
 
           <div class="toolbar">
-            <button type="button" class="btn btn--red" id="btn-download">Unduh config.json</button>
-            <button type="button" class="btn btn--outline" id="btn-reset">Reset Data Lokal</button>
+            <button type="button" class="btn btn--red" id="btn-publish">Publish Sekarang</button>
+            <button type="button" class="btn btn--outline" id="btn-download">Unduh config.json</button>
+            <button type="button" class="btn btn--outline" id="btn-backup">Backup Semua Data</button>
+            <button type="button" class="btn btn--outline" id="btn-reset">Reset Draft Lokal</button>
           </div>
 
           <div class="field" style="margin-top:22px">
-            <label for="import-file">Impor config.json (restore / pindah device)</label>
+            <label for="import-file">Impor config.json / backup (restore)</label>
             <input type="file" id="import-file" accept="application/json,.json">
-            <p class="field__hint">Data lokal lama akan ditimpa oleh isi file.</p>
+            <p class="field__hint">Data draft saat ini akan ditimpa isi file.</p>
           </div>
         </div>
       </section>
@@ -204,6 +257,7 @@
     </main>
   </div>
 
+  <script src="assets/js/env.js"></script>
   <script src="assets/js/core.js"></script>
   <script src="assets/js/admin.js"></script>
 </body>

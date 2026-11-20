@@ -353,3 +353,105 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .sticky-save { position: sticky; bottom: 12px; margin-top: 20px; }
+
+/* ==========================================================================
+   Tambahan v3: pencarian, peta, badge status, form dinamis, pesanan
+   ========================================================================== */
+
+.search-box { position: relative; margin-bottom: 14px; }
+.search-box input { padding-left: 42px; background: var(--white); border-color: var(--line); }
+.search-box__icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--ink-muted); display: grid; place-items: center;
+}
+
+/* menu habis */
+.menu-card--out { opacity: .72; }
+.menu-card--out .menu-card__thumb img { filter: grayscale(1); }
+.tag-out {
+  position: absolute; top: 10px; left: 10px;
+  background: #44403c; color: #fafaf9;
+  font-size: .68rem; font-weight: 900; letter-spacing: .06em;
+  text-transform: uppercase; padding: 4px 9px; border-radius: 999px;
+}
+.btn--disabled, button:disabled {
+  background: #d6d3d1; color: #78716c; cursor: not-allowed; transform: none !important;
+}
+.btn.is-loading { opacity: .75; pointer-events: none; }
+
+/* peta */
+.map-wrap {
+  position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden;
+  border-radius: var(--radius); border: 2px solid var(--line); margin-bottom: 14px;
+  background: var(--amber-50);
+}
+.map-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+.footer-admin { font-size: .7rem; color: rgba(252, 211, 77, .75); }
+
+/* badge & status */
+.badge {
+  display: inline-block; font-size: .7rem; font-weight: 800; padding: 4px 10px;
+  border-radius: 999px; letter-spacing: .02em;
+}
+.badge--ok { background: #dcfce7; color: #166534; }
+.badge--warn { background: #fef3c7; color: #92400e; }
+.admin-header .badge--warn { background: #fde68a; color: #78350f; }
+
+.pill {
+  font-size: .68rem; font-weight: 900; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 999px; letter-spacing: .05em;
+}
+.pill--baru { background: #fee2e2; color: #991b1b; }
+.pill--diproses { background: #fef3c7; color: #92400e; }
+.pill--selesai { background: #dcfce7; color: #166534; }
+.pill--batal { background: #e7e5e4; color: #57534e; }
+
+/* form dinamis (layanan) */
+.repeat-list { display: grid; gap: 10px; margin-bottom: 16px; }
+.repeat-row {
+  display: flex; align-items: center; gap: 10px;
+  background: #fafaf9; border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px;
+}
+.repeat-row .svc-label { flex: 1; background: var(--white); border-color: var(--line); padding: 9px 12px; }
+
+.switch { position: relative; display: inline-flex; flex: none; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.switch span {
+  width: 42px; height: 24px; border-radius: 999px; background: #d6d3d1;
+  position: relative; transition: background .18s ease; display: inline-block;
+}
+.switch span::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--white); transition: transform .18s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+}
+.switch input:checked + span { background: var(--green-600); }
+.switch input:checked + span::after { transform: translateX(18px); }
+.switch input:focus-visible + span { outline: 3px solid var(--amber-400); outline-offset: 2px; }
+
+.check-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+.check { display: inline-flex; align-items: center; gap: 8px; font-size: .85rem; font-weight: 700; }
+.check input { width: 18px; height: 18px; accent-color: var(--red-600); }
+
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* kartu pesanan */
+.orders-list { display: grid; gap: 12px; }
+.order-card { border: 2px solid var(--line); border-radius: 12px; padding: 14px; }
+.order-card header {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;
+}
+.order-card__meta { display: block; font-size: .74rem; color: var(--ink-muted); }
+.order-card ul { margin: 0 0 8px; padding-left: 18px; font-size: .84rem; color: var(--ink-soft); }
+.order-card__note { font-size: .78rem; color: #92400e; background: #fef3c7; padding: 6px 10px; border-radius: 8px; margin: 0 0 8px; }
+.order-card footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  flex-wrap: wrap; font-weight: 800; border-top: 1px dashed var(--line); padding-top: 8px;
+}
+.order-card__time { font-size: .72rem; font-weight: 600; color: var(--ink-muted); }
+.order-card footer select { width: auto; padding: 6px 32px 6px 10px; font-size: .78rem; }
+
+.admin-menu-card.is-out img { filter: grayscale(1); opacity: .7; }
+.admin-menu-card__actions { flex-wrap: wrap; }
+.admin-menu-card__actions .btn { padding: 6px 4px; }

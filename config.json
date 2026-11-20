@@ -1,13 +1,18 @@
 {
-  "version": 2,
+  "version": 3,
   "businessName": "Mie Ayam Wonogiri Mas Jon",
   "tagline": "Rasa Otentik Khas Wonogiri",
   "phoneNo": "6281386067672",
   "address": "Jl. Raya Wonogiri No. 45, Kecamatan Wonogiri, Jawa Tengah (Samping Bank BCA / Depan Alun-Alun)",
-  "mapsUrl": "",
+  "mapsUrl": "https://maps.google.com/?q=Mie+Ayam+Wonogiri+Mas+Jon",
   "openingHours": "Setiap hari, 09.00 - 21.00 WIB",
   "welcomeDescription": "Kami menyajikan Mie Ayam berkualitas tinggi dengan resep tradisional Wonogiri yang sudah teruji cita rasanya. Setiap porsi dibuat fresh dengan bahan-bahan pilihan terbaik.",
   "adminPin": "1234",
+  "services": [
+    { "id": "dine-in", "label": "Makan di Tempat", "enabled": true },
+    { "id": "takeaway", "label": "Bawa Pulang (Takeaway)", "enabled": true },
+    { "id": "delivery", "label": "Delivery / Kirim ke Alamat", "enabled": true }
+  ],
   "menu": [
     {
       "id": "mie-ayam-biasa",
@@ -15,7 +20,8 @@
       "category": "Makanan",
       "description": "Mie + potongan ayam semur + sawi segar",
       "price": 12000,
-      "image": "assets/menu/mie-ayam-biasa.webp"
+      "image": "assets/menu/mie-ayam-biasa.webp",
+      "soldOut": false
     },
     {
       "id": "mie-ayam-bakso",
@@ -23,7 +29,8 @@
       "category": "Makanan",
       "description": "Mie + ayam semur + 2 bakso sapi",
       "price": 16000,
-      "image": "assets/menu/mie-ayam-bakso.webp"
+      "image": "assets/menu/mie-ayam-bakso.webp",
+      "soldOut": false
     },
     {
       "id": "mie-ayam-ceker",
@@ -31,7 +38,8 @@
       "category": "Makanan",
       "description": "Mie + ayam semur + 2 ceker empuk",
       "price": 15000,
-      "image": "assets/menu/mie-ayam-ceker.webp"
+      "image": "assets/menu/mie-ayam-ceker.webp",
+      "soldOut": false
     },
     {
       "id": "mie-ayam-spesial",
@@ -39,7 +47,9 @@
       "category": "Makanan",
       "description": "Mie + ayam + bakso + ceker lengkap",
       "price": 20000,
-      "image": "assets/menu/mie-ayam-spesial.webp"
+      "image": "assets/menu/mie-ayam-spesial.webp",
+      "soldOut": false,
+      "isSpecial": true
     },
     {
       "id": "es-teh",
@@ -47,7 +57,8 @@
       "category": "Minuman",
       "description": "Es teh sedap segar",
       "price": 4000,
-      "image": "assets/menu/es-teh.webp"
+      "image": "assets/menu/es-teh.webp",
+      "soldOut": false
     },
     {
       "id": "es-jeruk",
@@ -55,12 +66,13 @@
       "category": "Minuman",
       "description": "Jeruk peras segar & dingin",
       "price": 5000,
-      "image": "assets/menu/es-jeruk.webp"
+      "image": "assets/menu/es-jeruk.webp",
+      "soldOut": false
     }
   ],
   "socmed": {
-    "instagram": "https://instagram.com",
-    "facebook": "https://facebook.com",
-    "whatsapp": "https://wa.me/6281386067672"
+    "instagram": "",
+    "facebook": "",
+    "whatsapp": ""
   }
 }

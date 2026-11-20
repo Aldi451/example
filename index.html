@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Mie Ayam Wonogiri Mas Jon — mie ayam otentik khas Wonogiri. Pesan langsung via WhatsApp, bisa makan di tempat, takeaway, atau delivery.">
+  <meta name="description" content="Mie Ayam Wonogiri Mas Jon — mie ayam otentik khas Wonogiri. Pesan via WhatsApp: makan di tempat, takeaway, atau delivery.">
   <meta name="theme-color" content="#b91c1c">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; frame-src https://maps.google.com https://www.google.com; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Mie Ayam Wonogiri Mas Jon</title>
   <link rel="icon" href="assets/img/favicon.png" type="image/png">
   <link rel="preload" href="assets/menu/mie-ayam-spesial.webp" as="image" fetchpriority="high">
   <link rel="preload" href="assets/img/logo.webp" as="image">
   <link rel="stylesheet" href="assets/css/style.css">
-  <!-- Open Graph: tampilan bagus saat link dibagikan di WA/FB -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Mie Ayam Wonogiri Mas Jon">
   <meta property="og:description" content="Rasa otentik khas Wonogiri. Pesan langsung via WhatsApp.">
@@ -23,16 +24,13 @@
     <div class="wrap site-header__inner">
       <div class="brand">
         <img src="assets/img/logo.webp" alt="Logo Mie Ayam Wonogiri Mas Jon"
-             class="brand__logo" width="48" height="48">
+             class="brand__logo" width="48" height="48" fetchpriority="high">
         <div>
           <h1 class="brand__name" id="brand-name">Mie Ayam Wonogiri</h1>
           <p class="brand__tag" id="brand-tag">Rasa Otentik</p>
         </div>
       </div>
       <div class="header-actions">
-        <a href="admin.html" class="btn btn--ghost" aria-label="Panel admin">
-          <span id="admin-icon" aria-hidden="true"></span><span class="label">Admin</span>
-        </a>
         <a href="#keranjang" class="btn btn--amber" aria-label="Lihat keranjang">
           <span id="cart-icon" aria-hidden="true"></span>
           <span class="cart-badge" id="cart-count">0</span>
@@ -59,6 +57,13 @@
       </div>
       <p class="section-sub">Pilih menu favorit Anda, lalu kirim pesanan lewat WhatsApp.</p>
 
+      <div class="search-box">
+        <span class="search-box__icon" id="search-icon" aria-hidden="true"></span>
+        <label for="menu-search" class="sr-only">Cari menu</label>
+        <input type="text" id="menu-search" placeholder="Cari menu… (contoh: bakso)"
+               autocomplete="off" maxlength="40">
+      </div>
+
       <div class="filters" id="filters" role="group" aria-label="Filter kategori menu"></div>
 
       <div class="menu-grid" id="menu-container">
@@ -68,9 +73,26 @@
       </div>
     </section>
 
+    <!-- ============ LOKASI ============ -->
+    <section id="lokasi" class="card" aria-labelledby="map-title" hidden>
+      <h2 class="section-title" id="map-title">
+        <span aria-hidden="true">📍</span> Lokasi Kami
+      </h2>
+      <p class="section-sub" id="map-address"></p>
+      <div class="map-wrap">
+        <iframe id="map-frame" title="Peta lokasi Mie Ayam Wonogiri Mas Jon"
+                loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen></iframe>
+      </div>
+      <a class="btn btn--red btn--block" id="map-link" target="_blank"
+         rel="noopener noreferrer">Buka di Google Maps</a>
+    </section>
+
     <!-- ============ KERANJANG ============ -->
     <section id="keranjang" class="card card--cart" aria-labelledby="cart-title">
-      <h2 class="section-title" id="cart-title"><span id="cart-title-icon" aria-hidden="true"></span> Rekap Pesanan Anda</h2>
+      <h2 class="section-title" id="cart-title">
+        <span id="cart-title-icon" aria-hidden="true"></span> Rekap Pesanan Anda
+      </h2>
 
       <div id="cart-items"></div>
 
@@ -82,11 +104,7 @@
       <form id="order-form" novalidate>
         <div class="field" id="field-service">
           <label for="service-type">Tipe Pelayanan</label>
-          <select id="service-type" name="service">
-            <option value="Makan di Tempat">Makan di Tempat</option>
-            <option value="Bawa Pulang (Takeaway)">Bawa Pulang (Takeaway)</option>
-            <option value="Delivery / Kirim ke Alamat">Delivery / Kirim ke Alamat</option>
-          </select>
+          <select id="service-type" name="service"></select>
           <p class="error-text" role="alert"></p>
         </div>
 
@@ -103,11 +121,11 @@
                  placeholder="Contoh: tanpa sawi, pedas, mie sedikit" maxlength="160">
         </div>
 
-        <button type="submit" class="btn btn--green">
+        <button type="submit" class="btn btn--green" id="submit-order">
           <span id="submit-icon" aria-hidden="true"></span> Kirim Pesanan via WhatsApp
         </button>
         <p class="field__hint">
-          Pesanan akan dibuka di WhatsApp. Pastikan nomor WhatsApp aktif.
+          Pesanan dibuka di WhatsApp. Jangan tutup halaman sebelum pesan terkirim.
         </p>
       </form>
     </section>
@@ -120,16 +138,19 @@
       <h3 class="site-footer__name" id="footer-name"></h3>
       <p class="site-footer__addr" id="footer-addr"></p>
       <div class="social" id="footer-social"></div>
-      <p class="copyright">&copy; <span id="year">2026</span> Mie Ayam Wonogiri Mas Jon. Semua hak dilindungi.</p>
+      <p class="copyright">
+        &copy; <span id="year">2026</span> Mie Ayam Wonogiri Mas Jon. Semua hak dilindungi.
+        <br><a href="admin.html" class="footer-admin">Panel Admin</a>
+      </p>
     </div>
   </footer>
 
-  <!-- Tombol keranjang mengapung (mobile) -->
   <button type="button" class="fab" id="fab" hidden>
     <span>Lihat Pesanan</span>
     <span class="fab__total" id="fab-total"></span>
   </button>
 
+  <script src="assets/js/env.js"></script>
   <script src="assets/js/core.js"></script>
   <script src="assets/js/app.js"></script>
 </body>

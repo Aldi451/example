@@ -1,7 +1,8 @@
-# Mie Ayam Wonogiri Mas Jon — Website & Panel Admin
+# Mie Ayam Wonogiri Mas Jon — Website & Dashboard Admin
 
-Website pemesanan statis (tanpa server, tanpa biaya hosting) untuk warung mie ayam.
-Pesanan dikirim langsung ke WhatsApp pemilik. Dihosting gratis di GitHub Pages.
+Website pemesanan statis (tanpa server, tanpa biaya hosting) + dashboard admin.
+Pesanan dikirim ke WhatsApp; opsional dicatat ke database untuk riwayat.
+Arsitektur disiapkan agar bisa pindah ke **Supabase** (gratis) tanpa mengubah kode fitur.
 
 **Live:** https://aldi451.github.io/example/
 
@@ -11,71 +12,93 @@ Pesanan dikirim langsung ke WhatsApp pemilik. Dihosting gratis di GitHub Pages.
 
 ```
 index.html                  # halaman pelanggan
-admin.html                  # panel admin (pin-protected)
-config.json                 # "database" situs: profil toko + daftar menu
+admin.html                  # dashboard admin
+config.json                 # data toko (mode demo = "database" situs)
 assets/
-  css/style.css             # semua styling (tanpa framework CDN)
-  js/core.js                # helper bersama (load config, format rupiah, XSS guard)
-  js/app.js                 # logika keranjang & checkout WhatsApp
-  js/admin.js               # logika panel admin
-  img/                      # logo + favicon (WebP/PNG, sudah dikompres)
-  menu/                     # foto menu (WebP, 4:3, ~40-110 KB)
-scripts/validate-config.js  # validator config.json (dipakai CI)
-.github/workflows/          # validasi otomatis saat config.json diubah
+  css/style.css             # styling (tanpa framework CDN)
+  js/env.js                 # penentu backend: local / supabase   ← mulai dari sini
+  js/core.js                # util + lapisan data DB.* (satu pintu ke backend)
+  js/app.js                 # keranjang, checkout WhatsApp, peta
+  js/admin.js               # dashboard: profil, menu, layanan, sosmed, pesanan, publish
+  img/  menu/               # logo & foto menu (WebP, sudah dikompres)
+supabase/
+  schema.sql                # tabel + RLS + trigger (jalankan di SQL Editor)
+  README.md                 # panduan migrasi langkah demi langkah
+  hardening.md              # checklist keamanan wajib sebelum go-live
+scripts/validate-config.js  # validator config.json
 ```
 
-## Cara mengubah menu / profil toko
+## Dua mode backend
 
-### Opsi A — Panel admin (disarankan untuk pemilik warung)
-1. Buka `admin.html`, masukkan PIN (default `1234`, ubah di `config.json` → `adminPin`).
-2. Edit menu / harga / alamat / sosmed. Klik **Simpan**.
-3. Masuk tab **Publish / Backup** → **Unduh config.json**.
-4. Upload file itu ke repo GitHub, menimpa `config.json` yang lama, lalu commit.
-5. Tunggu ±1 menit, GitHub Pages build otomatis. Selesai — semua pengunjung melihat perubahan.
+| | Mode demo (sekarang) | Mode Supabase |
+|---|---|---|
+| Atur di | `assets/js/env.js` → `backend: "local"` | `backend: "supabase"` + isi URL & anon key |
+| Login admin | PIN (default `1234`) | Email + password (Supabase Auth) |
+| Data menu | `config.json` + localStorage | tabel `store_live` / `store_draft` |
+| Draft vs publish | tidak ada | ada — aman edit sebelum publish |
+| Riwayat pesanan | browser admin saja | tabel `orders` |
+| Biaya | Rp 0 | Rp 0 (plan Free) |
 
-### Opsi B — Edit langsung
-Ubah `config.json` lalu commit. Jalankan `node scripts/validate-config.js` dulu
-untuk memastikan formatnya benar.
+Panduan lengkap: [`supabase/README.md`](supabase/README.md).
 
-> Perubahan dari panel admin disimpan di `localStorage` browser sebagai *preview*.
-> Itu tidak otomatis tersebar ke pengunjung lain — **wajib** diekspor ke `config.json`.
+## Alur kerja pemilik warung
+
+### Mode demo (sekarang)
+1. Buka `admin.html`, masukkan PIN.
+2. Ubah profil / menu / harga / layanan / sosmed → **Simpan**.
+3. Tab **Publish / Backup** → **Unduh config.json** → upload ke repo (menimpa `config.json`) → commit.
+4. ±1 menit kemudian GitHub Pages build otomatis.
+
+### Mode Supabase (nanti)
+1. Login email + password.
+2. Edit → **Simpan** (masuk draft) → **Publish**.
+3. Selesai. Tanpa upload file, tanpa commit.
 
 ## Menambah foto menu
 
-1. Simpan foto ke folder `assets/menu/`, nama file huruf kecil tanpa spasi
-   (contoh: `mie-ayam-jumbo.webp`).
-2. Rasio ideal **4:3**, lebar 880 px, format **WebP**, ukuran < 150 KB.
-   Konversi: `convert foto.jpg -resize 880x660^ -gravity center -extent 880x660 -strip -quality 80 assets/menu/nama.webp`
-3. Daftarkan path-nya di menu admin / `config.json`: `"image": "assets/menu/nama.webp"`.
+1. Simpan ke `assets/menu/`, nama huruf kecil tanpa spasi, mis. `mie-ayam-jumbo.webp`.
+2. Rasio **4:3**, lebar 880 px, WebP, < 150 KB:
+   ```bash
+   convert foto.jpg -resize 880x660^ -gravity center -extent 880x660 -strip -quality 80 assets/menu/nama.webp
+   ```
+3. Isi kolom **Gambar** di dashboard: `assets/menu/nama.webp`.
 
 ## Menjalankan lokal
 
 ```bash
-python3 -m http.server 8080
-# buka http://localhost:8080
+python3 -m http.server 8080     # buka http://localhost:8080
+node scripts/validate-config.js # cek config.json sebelum commit
 ```
 
-Wajib lewat server (bukan dobel-klik `index.html`), karena `config.json` diambil via `fetch`.
+Harus lewat server (bukan dobel-klik `index.html`) karena `config.json` diambil via `fetch`.
 
-## Keamanan & batasan (penting)
+## Keamanan yang sudah terpasang
 
-- Panel admin **bukan** sistem login sungguhan. PIN dicek di sisi browser, dan
-  `adminPin` ada di `config.json` yang publik. Ia hanya mencegah orang iseng —
-  **bukan** melindungi data rahasia. Jangan simpan data pelanggan/harga modal di sini.
-- Data pesanan tidak disimpan di server mana pun; pesanan hanya berupa pesan WhatsApp.
-- Karena statis, harga/menu tidak bisa berubah real-time per menit. Untuk kebutuhan
-  itu (multi-cabang, stok, pembayaran online, laporan penjualan) perlu backend —
-  lihat bagian *Rekomendasi pengembangan* di bawah.
+- **CSP** via meta: `default-src 'self'`, `object-src 'none'`, `base-uri 'none'`.
+- **Anti-XSS**: semua data eksternal lewat `esc()` sebelum `innerHTML`; input HTML tidak tereksekusi.
+- **Anti `javascript:`**: semua URL lewat `safeUrl()` yang hanya meloloskan http/https.
+- **Validasi sisi klien** pada semua form + validasi struktur via `scripts/validate-config.js`.
+- **RLS** di `supabase/schema.sql`: anon hanya bisa baca `store_live` & insert `orders`.
+- **PIN/anon key bukan rahasia** — jangan pernah taruh `service_role` key di repo.
 
-## Rekomendasi pengembangan selanjutnya
+Checklist go-live: [`supabase/hardening.md`](supabase/hardening.md).
 
-| Prioritas | Kebutuhan | Solusi ringan |
+## Status demo (sengaja dikosongkan)
+
+- `socmed.instagram` / `facebook` / `whatsapp` = `""` → ikonnya disembunyikan otomatis.
+- `mapsUrl` = link dummy Google Maps → ganti dengan link asli saat toko siap online.
+- `adminPin` masih `1234` → ganti sebelum dipakai sungguhan.
+
+## Roadmap
+
+| Prioritas | Kebutuhan | Solusi |
 |---|---|---|
-| Tinggi | Pemilik malas upload manual tiap edit | Pindah ke **Supabase/Firebase** (auth + tabel menu), hosting tetap Pages |
-| Tinggi | Notifikasi pesanan rapi (bukan cuma chat WA) | WhatsApp Cloud API / Fonnte + serverless function |
-| Sedang | Pembayaran online (QRIS) | Midtrans/Xendit static QRIS, konfirmasi manual |
-| Sedang | SEO lokal | Google Business Profile + schema.org `Restaurant` + `sitemap.xml` |
-| Rendah | Multi-bahasa (ID/EN) | file `i18n/*.json` + tombol bahasa |
+| Tinggi | Pindah ke database | Supabase (SQL & panduan sudah siap) |
+| Tinggi | Upload foto dari HP | Supabase Storage bucket `menu` |
+| Sedang | Anti-spam pesanan | Cloudflare Turnstile + Edge Function |
+| Sedang | Notifikasi pesanan masuk | WhatsApp Cloud API / Fonnte |
+| Sedang | Pembayaran QRIS | Midtrans/Xendit static QRIS |
+| Rendah | SEO lokal | Google Business Profile + schema.org `Restaurant` |
 
 ## Lisensi
 
