@@ -1,0 +1,66 @@
+{
+  "version": 2,
+  "businessName": "Mie Ayam Wonogiri Mas Jon",
+  "tagline": "Rasa Otentik Khas Wonogiri",
+  "phoneNo": "6281386067672",
+  "address": "Jl. Raya Wonogiri No. 45, Kecamatan Wonogiri, Jawa Tengah (Samping Bank BCA / Depan Alun-Alun)",
+  "mapsUrl": "",
+  "openingHours": "Setiap hari, 09.00 - 21.00 WIB",
+  "welcomeDescription": "Kami menyajikan Mie Ayam berkualitas tinggi dengan resep tradisional Wonogiri yang sudah teruji cita rasanya. Setiap porsi dibuat fresh dengan bahan-bahan pilihan terbaik.",
+  "adminPin": "1234",
+  "menu": [
+    {
+      "id": "mie-ayam-biasa",
+      "name": "Mie Ayam Biasa",
+      "category": "Makanan",
+      "description": "Mie + potongan ayam semur + sawi segar",
+      "price": 12000,
+      "image": "assets/menu/mie-ayam-biasa.webp"
+    },
+    {
+      "id": "mie-ayam-bakso",
+      "name": "Mie Ayam Bakso",
+      "category": "Makanan",
+      "description": "Mie + ayam semur + 2 bakso sapi",
+      "price": 16000,
+      "image": "assets/menu/mie-ayam-bakso.webp"
+    },
+    {
+      "id": "mie-ayam-ceker",
+      "name": "Mie Ayam Ceker",
+      "category": "Makanan",
+      "description": "Mie + ayam semur + 2 ceker empuk",
+      "price": 15000,
+      "image": "assets/menu/mie-ayam-ceker.webp"
+    },
+    {
+      "id": "mie-ayam-spesial",
+      "name": "Mie Ayam Spesial",
+      "category": "Makanan",
+      "description": "Mie + ayam + bakso + ceker lengkap",
+      "price": 20000,
+      "image": "assets/menu/mie-ayam-spesial.webp"
+    },
+    {
+      "id": "es-teh",
+      "name": "Es Teh Manis",
+      "category": "Minuman",
+      "description": "Es teh sedap segar",
+      "price": 4000,
+      "image": "assets/menu/es-teh.webp"
+    },
+    {
+      "id": "es-jeruk",
+      "name": "Es Jeruk Peras",
+      "category": "Minuman",
+      "description": "Jeruk peras segar & dingin",
+      "price": 5000,
+      "image": "assets/menu/es-jeruk.webp"
+    }
+  ],
+  "socmed": {
+    "instagram": "https://instagram.com",
+    "facebook": "https://facebook.com",
+    "whatsapp": "https://wa.me/6281386067672"
+  }
+}

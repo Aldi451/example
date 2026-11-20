@@ -1,405 +1,210 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Mie Ayam Wonogiri</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .tab-btn.active {
-            @apply bg-red-600 text-white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Panel — Mie Ayam Wonogiri Mas Jon</title>
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="admin-body">
 
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-red-700 to-red-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-6 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-cog text-3xl"></i>
-                <div>
-                    <h1 class="text-2xl font-black">Admin Panel</h1>
-                    <p class="text-xs text-red-200">Kelola Bisnis Anda</p>
-                </div>
-            </div>
-            <div class="space-x-3">
-                <a href="index.html" class="bg-amber-500 hover:bg-amber-600 text-red-900 px-4 py-2 rounded-lg font-bold transition">
-                    ← Kembali ke Website
-                </a>
-                <button onclick="resetAllData()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold transition">
-                    Reset
-                </button>
-            </div>
+  <!-- ============ LOCK SCREEN ============ -->
+  <div class="lock-screen" id="lock-screen">
+    <h1>Admin Panel</h1>
+    <p>Masukkan PIN untuk mengelola menu & profil toko.</p>
+    <form id="lock-form">
+      <div class="field">
+        <label for="pin-input" class="sr-only">PIN</label>
+        <input type="password" id="pin-input" inputmode="numeric" autocomplete="current-password"
+               placeholder="PIN admin" required>
+        <p class="error-text" id="pin-error" role="alert"></p>
+      </div>
+      <button type="submit" class="btn btn--red btn--block">Masuk</button>
+    </form>
+    <p class="field__hint" style="margin-top:16px">
+      PIN default: <code>1234</code> — ganti di <code>config.json</code> (<code>adminPin</code>).
+    </p>
+  </div>
+
+  <!-- ============ ADMIN CONTENT ============ -->
+  <div id="admin-content" hidden>
+
+    <header class="admin-header">
+      <div class="wrap admin-header__inner">
+        <div>
+          <h1>Admin Panel</h1>
+          <p>Kelola bisnis Anda</p>
         </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="index.html" class="btn btn--amber btn--sm">Lihat Website</a>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-logout">Keluar</button>
+        </div>
+      </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <main class="wrap" style="padding-block:24px 60px">
 
-        <!-- Tabs Navigation -->
-        <div class="flex gap-2 mb-6 flex-wrap">
-            <button class="tab-btn active bg-red-600 text-white px-6 py-3 rounded-lg font-bold transition" onclick="showTab('general')">
-                <i class="fas fa-cog mr-2"></i> Pengaturan Umum
-            </button>
-            <button class="tab-btn bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-bold hover:bg-gray-400 transition" onclick="showTab('menu')">
-                <i class="fas fa-utensils mr-2"></i> Menu
-            </button>
-            <button class="tab-btn bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-bold hover:bg-gray-400 transition" onclick="showTab('socmed')">
-                <i class="fas fa-share-alt mr-2"></i> Social Media
-            </button>
-        </div>
+      <div class="notice notice--warn">
+        <strong>Penting:</strong> perubahan di halaman ini tersimpan di browser Anda
+        (localStorage) sebagai <em>preview</em>. Supaya semua pengunjung melihat perubahan,
+        klik <strong>Unduh config.json</strong> lalu upload file itu ke repo (folder utama,
+        menimpa <code>config.json</code>). Tersimpan <span id="dirty-badge" hidden>— ada perubahan belum diekspor.</span>
+      </div>
 
-        <!-- TAB: Pengaturan Umum -->
-        <div id="general" class="tab-content active">
-            <div class="bg-white rounded-2xl shadow-lg p-8 space-y-6">
-                <h2 class="text-2xl font-black text-red-700 mb-4">Pengaturan Umum</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab" data-tab="general" role="tab" aria-selected="true">Pengaturan Umum</button>
+        <button class="tab" data-tab="menu" role="tab" aria-selected="false">Menu</button>
+        <button class="tab" data-tab="socmed" role="tab" aria-selected="false">Social Media</button>
+        <button class="tab" data-tab="publish" role="tab" aria-selected="false">Publish / Backup</button>
+      </div>
 
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold mb-2 text-gray-700">Nama Bisnis:</label>
-                        <input type="text" id="business-name" placeholder="Mie Ayam Wonogiri Mas Jon" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold mb-2 text-gray-700">Nomor WhatsApp (hanya angka):</label>
-                        <input type="text" id="phone-no" placeholder="6281386067672" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-gray-700">Alamat Toko:</label>
-                    <textarea id="address" placeholder="Jl. Raya Wonogiri No. 45, Kecamatan Wonogiri, Jawa Tengah" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600" rows="3"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-gray-700">Deskripsi Selamat Datang:</label>
-                    <textarea id="welcome-desc" placeholder="Kami menyajikan Mie Ayam berkualitas tinggi..." class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600" rows="4"></textarea>
-                </div>
-
-                <button onclick="saveGeneralSettings()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-black py-3 rounded-lg transition transform hover:scale-105">
-                    <i class="fas fa-save mr-2"></i> Simpan Perubahan
-                </button>
+      <!-- ============ TAB: UMUM ============ -->
+      <section class="panel" id="general">
+        <form id="general-form" class="card">
+          <h2 class="section-title">Pengaturan Umum</h2>
+          <div class="grid-2">
+            <div class="field">
+              <label for="business-name">Nama Bisnis</label>
+              <input type="text" id="business-name" maxlength="60" required>
             </div>
-        </div>
-
-        <!-- TAB: Menu Management -->
-        <div id="menu" class="tab-content">
-            <div class="space-y-6">
-                <!-- Form Tambah Menu -->
-                <div class="bg-white rounded-2xl shadow-lg p-8">
-                    <h2 class="text-2xl font-black text-red-700 mb-6">Tambah/Edit Menu</h2>
-                    
-                    <div class="grid md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-bold mb-2 text-gray-700">Nama Menu:</label>
-                            <input type="text" id="menu-name" placeholder="Mie Ayam Biasa" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold mb-2 text-gray-700">Harga (Rp):</label>
-                            <input type="number" id="menu-price" placeholder="12000" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold mb-2 text-gray-700">Deskripsi:</label>
-                        <input type="text" id="menu-desc" placeholder="Mie + Potongan Ayam Semur + Sawis" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold mb-2 text-gray-700">URL Gambar:</label>
-                        <input type="text" id="menu-image" placeholder="https://via.placeholder.com/300x200?text=Menu" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-600 text-xs">
-                        <p class="text-xs text-gray-500 mt-1">💡 Gunakan URL gambar online atau upload di tempat lain dulu</p>
-                    </div>
-
-                    <div class="flex gap-3 mt-6">
-                        <button onclick="addOrUpdateMenu()" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-black py-3 rounded-lg transition">
-                            <i class="fas fa-plus mr-2"></i> Tambah Menu
-                        </button>
-                        <button onclick="resetMenuForm()" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-black py-3 rounded-lg transition">
-                            Bersihkan Form
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Daftar Menu -->
-                <div class="bg-white rounded-2xl shadow-lg p-8">
-                    <h2 class="text-2xl font-black text-red-700 mb-6">Daftar Menu Saat Ini</h2>
-                    <div id="menu-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Menu items akan dimuat di sini -->
-                    </div>
-                </div>
+            <div class="field">
+              <label for="tagline">Tagline</label>
+              <input type="text" id="tagline" maxlength="60" placeholder="Rasa Otentik Khas Wonogiri">
             </div>
-        </div>
-
-        <!-- TAB: Social Media -->
-        <div id="socmed" class="tab-content">
-            <div class="bg-white rounded-2xl shadow-lg p-8 space-y-6">
-                <h2 class="text-2xl font-black text-red-700 mb-6">Kelola Social Media</h2>
-
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-gray-700">
-                        <i class="fab fa-instagram text-pink-600 mr-2"></i> URL Instagram:
-                    </label>
-                    <input type="text" id="instagram-url" placeholder="https://instagram.com/mieyamwonogiri" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-pink-600">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-gray-700">
-                        <i class="fab fa-facebook text-blue-600 mr-2"></i> URL Facebook:
-                    </label>
-                    <input type="text" id="facebook-url" placeholder="https://facebook.com/mieyamwonogiri" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-600">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-gray-700">
-                        <i class="fab fa-whatsapp text-green-600 mr-2"></i> URL WhatsApp:
-                    </label>
-                    <input type="text" id="whatsapp-url" placeholder="https://wa.me/6281386067672" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-600">
-                </div>
-
-                <button onclick="saveSocmedSettings()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-black py-3 rounded-lg transition transform hover:scale-105">
-                    <i class="fas fa-save mr-2"></i> Simpan Social Media
-                </button>
+            <div class="field">
+              <label for="phone-no">Nomor WhatsApp</label>
+              <input type="tel" id="phone-no" inputmode="numeric" placeholder="6281386067672">
+              <p class="field__hint">Boleh diawali 0 — otomatis diubah ke format 62.</p>
             </div>
+            <div class="field">
+              <label for="opening-hours">Jam Buka</label>
+              <input type="text" id="opening-hours" maxlength="60" placeholder="Setiap hari, 09.00 - 21.00 WIB">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="address">Alamat Toko</label>
+            <textarea id="address" rows="2" maxlength="200"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="maps-url">Link Google Maps (opsional)</label>
+            <input type="url" id="maps-url" placeholder="https://maps.app.goo.gl/...">
+          </div>
+
+          <div class="field">
+            <label for="welcome-desc">Deskripsi Selamat Datang</label>
+            <textarea id="welcome-desc" rows="3" maxlength="400"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn--red btn--block">Simpan Pengaturan</button>
+        </form>
+      </section>
+
+      <!-- ============ TAB: MENU ============ -->
+      <section class="panel" id="menu" hidden>
+        <form id="menu-form" class="card" style="margin-bottom:18px">
+          <h2 class="section-title" id="menu-form-title">Tambah Menu Baru</h2>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="menu-name">Nama Menu</label>
+              <input type="text" id="menu-name" maxlength="60" placeholder="Mie Ayam Biasa">
+              <p class="error-text" role="alert"></p>
+            </div>
+            <div class="field">
+              <label for="menu-price">Harga (Rp)</label>
+              <input type="number" id="menu-price" min="0" step="500" placeholder="12000">
+              <p class="error-text" role="alert"></p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="menu-category">Kategori</label>
+              <select id="menu-category">
+                <option value="Makanan">Makanan</option>
+                <option value="Minuman">Minuman</option>
+                <option value="Tambahan / Topping">Tambahan / Topping</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="menu-image">Gambar</label>
+              <input type="text" id="menu-image" placeholder="assets/menu/mie-ayam-biasa.webp">
+              <p class="field__hint">Path lokal atau URL https. Kosongkan untuk pakai logo.</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="menu-desc">Deskripsi</label>
+            <input type="text" id="menu-desc" maxlength="120" placeholder="Mie + ayam semur + sawi segar">
+          </div>
+
+          <img id="image-preview" alt="Pratinjau gambar menu" hidden
+               style="max-width:220px;border-radius:12px;margin-bottom:16px">
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="submit" class="btn btn--red" id="save-menu-btn">Tambah Menu</button>
+            <button type="button" class="btn btn--outline" id="btn-reset-menu">Bersihkan</button>
+          </div>
+        </form>
+
+        <div class="card">
+          <h2 class="section-title">Daftar Menu Saat Ini</h2>
+          <div class="admin-menu-grid" id="menu-list"></div>
         </div>
+      </section>
+
+      <!-- ============ TAB: SOCMED ============ -->
+      <section class="panel" id="socmed" hidden>
+        <form id="socmed-form" class="card">
+          <h2 class="section-title">Kelola Social Media</h2>
+          <div class="field">
+            <label for="instagram-url">URL Instagram</label>
+            <input type="url" id="instagram-url" placeholder="https://instagram.com/mieayamwonogiri">
+          </div>
+          <div class="field">
+            <label for="facebook-url">URL Facebook</label>
+            <input type="url" id="facebook-url" placeholder="https://facebook.com/mieayamwonogiri">
+          </div>
+          <div class="field">
+            <label for="whatsapp-url">URL WhatsApp</label>
+            <input type="url" id="whatsapp-url" placeholder="https://wa.me/6281386067672">
+          </div>
+          <button type="submit" class="btn btn--red btn--block">Simpan Social Media</button>
+        </form>
+      </section>
+
+      <!-- ============ TAB: PUBLISH ============ -->
+      <section class="panel" id="publish" hidden>
+        <div class="card">
+          <h2 class="section-title">Publish &amp; Backup</h2>
+          <div class="notice notice--info">
+            <strong>Alur publish:</strong><br>
+            1. Klik <em>Unduh config.json</em>.<br>
+            2. Buka repo GitHub → <code>config.json</code> → <em>Edit</em> / upload file baru.<br>
+            3. Commit. GitHub Pages otomatis build (±1 menit), perubahan live untuk semua orang.
+          </div>
+
+          <div class="toolbar">
+            <button type="button" class="btn btn--red" id="btn-download">Unduh config.json</button>
+            <button type="button" class="btn btn--outline" id="btn-reset">Reset Data Lokal</button>
+          </div>
+
+          <div class="field" style="margin-top:22px">
+            <label for="import-file">Impor config.json (restore / pindah device)</label>
+            <input type="file" id="import-file" accept="application/json,.json">
+            <p class="field__hint">Data lokal lama akan ditimpa oleh isi file.</p>
+          </div>
+        </div>
+      </section>
 
     </main>
+  </div>
 
-    <script>
-        let config = {
-            businessName: "Mie Ayam Wonogiri Mas Jon",
-            phoneNo: "6281386067672",
-            address: "Jl. Raya Wonogiri No. 45, Kecamatan Wonogiri, Jawa Tengah (Samping Bank BCA / Depan Alun-Alun)",
-            welcomeDescription: "Kami menyajikan Mie Ayam berkualitas tinggi dengan resep tradisional Wonogiri yang sudah teruji cita rasanya. Setiap porsi dibuat fresh dengan bahan-bahan pilihan terbaik.",
-            menu: [
-                {
-                    id: 1,
-                    name: "Mie Ayam Biasa",
-                    description: "Mie + Potongan Ayam Semur + Sawis",
-                    price: 12000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Biasa"
-                },
-                {
-                    id: 2,
-                    name: "Mie Ayam Bakso",
-                    description: "Mie + Ayam Semur + 2 Bakso Sapi",
-                    price: 16000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Bakso"
-                },
-                {
-                    id: 3,
-                    name: "Mie Ayam Ceker",
-                    description: "Mie + Ayam Semur + 2 Ceker Empuk",
-                    price: 15000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Ceker"
-                },
-                {
-                    id: 4,
-                    name: "Mie Ayam Spesial",
-                    description: "Mie + Ayam + Bakso + Ceker Lengkap",
-                    price: 20000,
-                    image: "https://via.placeholder.com/300x200?text=Mie+Ayam+Spesial"
-                },
-                {
-                    id: 5,
-                    name: "Es Teh Manis",
-                    description: "Es Teh Sedap Segar",
-                    price: 4000,
-                    image: "https://via.placeholder.com/300x200?text=Es+Teh+Manis"
-                },
-                {
-                    id: 6,
-                    name: "Es Jeruk Peras",
-                    description: "Jeruk Peras Segar & Dingin",
-                    price: 5000,
-                    image: "https://via.placeholder.com/300x200?text=Es+Jeruk+Peras"
-                }
-            ],
-            socmed: {
-                instagram: "https://instagram.com",
-                facebook: "https://facebook.com",
-                whatsapp: "https://wa.me/6281386067672"
-            }
-        };
-
-        let editingMenuId = null;
-
-        // Load config from localStorage
-        function loadConfig() {
-            const saved = localStorage.getItem('restaurantConfig');
-            if (saved) {
-                config = JSON.parse(saved);
-            }
-            loadFormData();
-        }
-
-        function loadFormData() {
-            document.getElementById('business-name').value = config.businessName;
-            document.getElementById('phone-no').value = config.phoneNo;
-            document.getElementById('address').value = config.address;
-            document.getElementById('welcome-desc').value = config.welcomeDescription;
-            
-            document.getElementById('instagram-url').value = config.socmed.instagram;
-            document.getElementById('facebook-url').value = config.socmed.facebook;
-            document.getElementById('whatsapp-url').value = config.socmed.whatsapp;
-
-            renderMenuList();
-        }
-
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active', 'bg-red-600', 'text-white');
-            event.target.classList.remove('bg-gray-300', 'text-gray-800');
-        }
-
-        function saveGeneralSettings() {
-            config.businessName = document.getElementById('business-name').value;
-            config.phoneNo = document.getElementById('phone-no').value;
-            config.address = document.getElementById('address').value;
-            config.welcomeDescription = document.getElementById('welcome-desc').value;
-
-            localStorage.setItem('restaurantConfig', JSON.stringify(config));
-            alert('✅ Pengaturan umum berhasil disimpan!');
-        }
-
-        function addOrUpdateMenu() {
-            const name = document.getElementById('menu-name').value.trim();
-            const price = parseInt(document.getElementById('menu-price').value);
-            const desc = document.getElementById('menu-desc').value.trim();
-            const image = document.getElementById('menu-image').value.trim();
-
-            if (!name || !price || !desc || !image) {
-                alert('❌ Mohon isi semua field dengan lengkap!');
-                return;
-            }
-
-            if (editingMenuId !== null) {
-                // Update existing
-                const menuItem = config.menu.find(m => m.id === editingMenuId);
-                if (menuItem) {
-                    menuItem.name = name;
-                    menuItem.price = price;
-                    menuItem.description = desc;
-                    menuItem.image = image;
-                    alert('✅ Menu berhasil diperbarui!');
-                    editingMenuId = null;
-                }
-            } else {
-                // Add new
-                const newId = Math.max(...config.menu.map(m => m.id), 0) + 1;
-                config.menu.push({
-                    id: newId,
-                    name,
-                    description: desc,
-                    price,
-                    image
-                });
-                alert('✅ Menu baru berhasil ditambahkan!');
-            }
-
-            localStorage.setItem('restaurantConfig', JSON.stringify(config));
-            resetMenuForm();
-            renderMenuList();
-        }
-
-        function editMenu(id) {
-            const menuItem = config.menu.find(m => m.id === id);
-            if (menuItem) {
-                document.getElementById('menu-name').value = menuItem.name;
-                document.getElementById('menu-price').value = menuItem.price;
-                document.getElementById('menu-desc').value = menuItem.description;
-                document.getElementById('menu-image').value = menuItem.image;
-                editingMenuId = id;
-                
-                // Scroll to form
-                document.querySelector('[onclick="showTab(\'menu\')"]').click();
-                document.getElementById('menu-name').focus();
-            }
-        }
-
-        function deleteMenu(id) {
-            if (confirm('❌ Apakah Anda yakin ingin menghapus menu ini?')) {
-                config.menu = config.menu.filter(m => m.id !== id);
-                localStorage.setItem('restaurantConfig', JSON.stringify(config));
-                renderMenuList();
-                alert('✅ Menu berhasil dihapus!');
-            }
-        }
-
-        function resetMenuForm() {
-            document.getElementById('menu-name').value = '';
-            document.getElementById('menu-price').value = '';
-            document.getElementById('menu-desc').value = '';
-            document.getElementById('menu-image').value = '';
-            editingMenuId = null;
-        }
-
-        function renderMenuList() {
-            const container = document.getElementById('menu-list');
-            container.innerHTML = '';
-
-            if (config.menu.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-3">Belum ada menu. Tambahkan menu baru!</p>';
-                return;
-            }
-
-            config.menu.forEach(item => {
-                const menuCard = document.createElement('div');
-                menuCard.className = 'bg-gradient-to-b from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300 overflow-hidden';
-                menuCard.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}" class="w-full h-32 object-cover">
-                    <div class="p-3">
-                        <h3 class="font-bold text-gray-800 text-sm">${item.name}</h3>
-                        <p class="text-xs text-gray-600 mb-2">${item.description}</p>
-                        <p class="text-red-700 font-bold mb-3">Rp ${item.price.toLocaleString('id-ID')}</p>
-                        <div class="flex gap-2">
-                            <button onclick="editMenu(${item.id})" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 rounded font-bold transition">
-                                <i class="fas fa-edit mr-1"></i> Edit
-                            </button>
-                            <button onclick="deleteMenu(${item.id})" class="flex-1 bg-red-500 hover:bg-red-600 text-white text-xs py-1 rounded font-bold transition">
-                                <i class="fas fa-trash mr-1"></i> Hapus
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(menuCard);
-            });
-        }
-
-        function saveSocmedSettings() {
-            config.socmed.instagram = document.getElementById('instagram-url').value.trim();
-            config.socmed.facebook = document.getElementById('facebook-url').value.trim();
-            config.socmed.whatsapp = document.getElementById('whatsapp-url').value.trim();
-
-            localStorage.setItem('restaurantConfig', JSON.stringify(config));
-            alert('✅ Social Media berhasil disimpan!');
-        }
-
-        function resetAllData() {
-            if (confirm('⚠️ PERHATIAN: Ini akan menghapus SEMUA data yang telah Anda edit dan mengembalikan ke data default. Lanjutkan?')) {
-                localStorage.removeItem('restaurantConfig');
-                location.reload();
-            }
-        }
-
-        // Load config when page loads
-        loadConfig();
-    </script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/admin.js"></script>
 </body>
 </html>
