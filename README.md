@@ -25,6 +25,7 @@ framework, tanpa CDN eksternal.
 > dibuka dari domain InfinityFree. GitHub tetap dipakai untuk menyimpan kode.
 
 Panduan deploy lengkap: **[`api-docs/INSTALL.md`](api-docs/INSTALL.md)**
+Cara test (mulai dari sini): **[`api-docs/TESTING.md`](api-docs/TESTING.md)**
 Checklist keamanan: **[`api-docs/SECURITY.md`](api-docs/SECURITY.md)**
 
 ---
@@ -53,7 +54,7 @@ tools/
   make-hash.php             # buat hash password admin via CLI
   import-config.php         # impor config.json → database
 scripts/validate-config.js  # validator config.json
-api-docs/                   # INSTALL.md, SECURITY.md
+api-docs/                   # INSTALL.md, TESTING.md, SECURITY.md
 ```
 
 ## Alur kerja pemilik warung

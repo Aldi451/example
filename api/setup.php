@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/lib/bootstrap.php';
 require_once __DIR__ . '/lib/db.php';
+require_once __DIR__ . '/lib/data.php';
 
 send_security_headers();
 
